@@ -64,11 +64,15 @@ export default {
           const members = customerList.filter(c => c.groupId === g.id && c.status !== 'cancelled');
           const totalRevenue = members.reduce((sum, c) => sum + c.price, 0);
 
+          const typeBadge = g.type === 'umrah' ? 'badge-umrah' : 'badge-hajj';
           return `
             <div class="group-card">
               <div class="group-card-header">
                 <div class="group-title">
-                  <h3>${g.name}</h3>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.15rem; flex-wrap: wrap;">
+                    <h3 style="margin: 0; line-height: 1.2;">${g.name}</h3>
+                    <span class="badge ${typeBadge}" style="font-size: 0.6rem; padding: 0.15rem 0.4rem; text-transform: uppercase;">${g.type || 'hajj'}</span>
+                  </div>
                   <span>Leader: <strong>${g.guide || 'Not Assigned'}</strong></span>
                 </div>
                 <span class="badge badge-hajj" style="font-size: 0.7rem;">
@@ -358,9 +362,18 @@ export default {
         </div>
         <form id="group-form">
           <div class="modal-body">
-            <div class="form-group">
-              <label for="g-name">Group / Tour Name *</label>
-              <input type="text" id="g-name" class="form-control" value="${group?.name || ''}" required placeholder="Hajj Cohort - Sept 2026">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="g-name">Group / Tour Name *</label>
+                <input type="text" id="g-name" class="form-control" value="${group?.name || ''}" required placeholder="Hajj Cohort - Sept 2026">
+              </div>
+              <div class="form-group">
+                <label for="g-type">Group Type *</label>
+                <select id="g-type" class="form-control" required>
+                  <option value="hajj" ${group?.type === 'hajj' ? 'selected' : ''}>Hajj Tour</option>
+                  <option value="umrah" ${group?.type === 'umrah' ? 'selected' : '' || !group}>Umrah Tour</option>
+                </select>
+              </div>
             </div>
 
             <div class="form-row">
@@ -406,7 +419,7 @@ export default {
                 return `
                   <label class="assignment-item" style="color: ${otherGroup ? 'var(--text-light)' : 'var(--text-main)'};">
                     <input type="checkbox" class="chk-member" data-id="${c.id}" ${isChecked ? 'checked' : ''}>
-                    <span>${c.name} ${statusLabel}</span>
+                    <span>${c.name} <span class="badge badge-${c.packageType}" style="font-size: 0.6rem; padding: 0.1rem 0.35rem; font-weight: 700; margin-left: 0.25rem;">${c.packageType}</span> ${statusLabel}</span>
                   </label>
                 `;
               }).join('')}
@@ -444,6 +457,7 @@ export default {
 
       const payload = {
         name: modalOverlay.querySelector('#g-name').value.trim(),
+        type: modalOverlay.querySelector('#g-type').value,
         departureDate: depDate,
         arrivalDate: arrDate,
         guide: modalOverlay.querySelector('#g-guide').value.trim(),
