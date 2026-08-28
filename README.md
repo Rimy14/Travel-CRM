@@ -2,8 +2,6 @@
 
 A modern, fast, and feature-rich Customer Relationship Management (CRM) system and tour cohort planner designed specifically for Hajj & Umrah travel operators. 
 
-Built with a friendly Emerald Green & Gold theme, the application operates out-of-the-box using local storage, with an option to connect to a real-time cloud database via Firebase Firestore.
-
 ---
 
 ## 🌟 Key Features
