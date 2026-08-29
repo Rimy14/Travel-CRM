@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amja Travels - Hajj & Umrah CRM</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="./assets/index-B2EZr_4M.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CgQC8tyS.css">
+  </head>
+  <body>
+    <div id="app" class="app-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-info">
+            <h2>Amja Travels</h2>
+            <span>Hajj & Umrah CRM</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-menu">
+          <button class="nav-item active" data-view="dashboard">
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+            </span>
+            <span class="nav-label">Dashboard</span>
+          </button>
+          <button class="nav-item" data-view="customers">
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </span>
+            <span class="nav-label">Customers</span>
+          </button>
+          <button class="nav-item" data-view="groups">
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </span>
+            <span class="nav-label">Groups & Itinerary</span>
+          </button>
+          <button class="nav-item" data-view="expenses">
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </span>
+            <span class="nav-label">Expenses & Finance</span>
+          </button>
+          <button class="nav-item" data-view="settings">
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </span>
+            <span class="nav-label">Firebase Setup</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="db-status-card local" id="db-status-indicator">
+            <span class="status-dot"></span>
+            <div class="status-details">
+              <span class="status-title">Database Status</span>
+              <span class="status-value" id="db-status-text">Local Storage Mode</span>
+            </div>
+            <button class="status-action-btn" id="db-status-configure" title="Configure Database">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </button>
+          </div>
+          <div class="credits">
+            <span>Amja Travels CRM v1.0</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Main Top Header -->
+        <header class="main-header">
+          <div class="header-title">
+            <h1 id="page-title">Dashboard</h1>
+            <p id="page-subtitle">Welcome back! Here's the current overview of Amja Travels.</p>
+          </div>
+          <div class="header-actions">
+            <div class="quick-add-dropdown">
+              <button class="btn btn-primary" id="btn-quick-add">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Quick Actions
+              </button>
+              <div class="dropdown-content" id="quick-add-menu">
+                <a href="#" data-action="new-customer">Add New Customer</a>
+                <a href="#" data-action="new-group">Create Travel Group</a>
+                <a href="#" data-action="new-expense">Record Expense</a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dynamic Panels (Toggled via CSS/JS) -->
+        <div class="panel-container">
+          
+          <!-- DASHBOARD PANEL -->
+          <section id="panel-dashboard" class="view-panel active">
+            <!-- Loading indicator/Dashboard Content will be injected dynamically -->
+          </section>
+
+          <!-- CUSTOMERS PANEL -->
+          <section id="panel-customers" class="view-panel">
+            <!-- Content will be injected dynamically -->
+          </section>
+
+          <!-- GROUPS PANEL -->
+          <section id="panel-groups" class="view-panel">
+            <!-- Content will be injected dynamically -->
+          </section>
+
+          <!-- EXPENSES PANEL -->
+          <section id="panel-expenses" class="view-panel">
+            <!-- Content will be injected dynamically -->
+          </section>
+
+          <!-- SETTINGS PANEL -->
+          <section id="panel-settings" class="view-panel">
+            <!-- Content will be injected dynamically -->
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- JS Entry Point -->
+  </body>
+</html>
