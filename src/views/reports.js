@@ -541,12 +541,6 @@ export default {
   },
 
   printReport(tab, customers, groups, expenses, allGroups) {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Please allow pop-ups to print this report.');
-      return;
-    }
-
     const tableHtml = this.renderActiveReportTable(tab, customers, groups, expenses, allGroups);
     const tabNames = {
       enrolled: 'Enrolled Pilgrims & Settlement Report',
@@ -555,44 +549,27 @@ export default {
       financial: 'Financial Health & Collections Summary'
     };
 
-    printWindow.document.write(`
+    const printHtml = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>Amja Travels - ${tabNames[tab]}</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 2rem; color: #0f172a; line-height: 1.5; }
-          .header { border-bottom: 2px solid #065f46; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+          @page { size: auto; margin: 12mm; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.5; margin: 0; padding: 0; }
+          .header { border-bottom: 2px solid #065f46; padding-bottom: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end; }
           .title { font-size: 22px; font-weight: 800; color: #065f46; margin: 0; letter-spacing: -0.02em; }
-          .sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+          .sub { font-size: 11px; color: #64748b; margin-top: 3px; }
           .meta { font-size: 11px; color: #475569; margin-bottom: 1.25rem; background: #f8fafc; padding: 0.6rem 0.85rem; border-radius: 6px; border: 1px solid #e2e8f0; }
           table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 0.75rem; }
           th { background: #f8fafc; text-align: left; padding: 6px 8px; border-bottom: 1px solid #cbd5e1; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em; }
           td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; }
-          .badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; }
+          .badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; border: 1px solid #cbd5e1; }
           .badge-sr { font-size: 9px; padding: 1px 4px; background: #fef3c7; color: #92400e; border-radius: 3px; display: inline-block; margin: 1px; }
           .footer { margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem; font-size: 10px; color: #94a3b8; text-align: center; }
-          @media print {
-            .no-print { display: none; }
-            body { padding: 0.5cm; }
-          }
         </style>
       </head>
       <body>
-        <div class="no-print" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <button onclick="window.close()" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Return to CRM / Close
-          </button>
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <span style="font-size: 12px; color: #64748b;">Tip: Press Esc or click Return to go back</span>
-            <button onclick="window.print()" style="background: #065f46; color: white; border: 1px solid #065f46; padding: 7px 18px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-              Print / Save as PDF
-            </button>
-          </div>
-        </div>
-        <script>window.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.close(); });</script>
         <div class="header">
           <div>
             <h1 class="title">AMJA TRAVELS</h1>
@@ -616,7 +593,30 @@ export default {
         </div>
       </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(printHtml);
+    doc.close();
+
+    iframe.contentWindow.focus();
+    setTimeout(() => {
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    }, 250);
   }
 };

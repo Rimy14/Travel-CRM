@@ -1171,62 +1171,39 @@ export default {
     const itinerary = selectedGroup.itinerary || [];
     const members = customerList.filter(c => c.groupId === selectedGroup.id && c.status !== 'cancelled');
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Please allow pop-ups to print the tour schedule.');
-      return;
-    }
-
-    printWindow.document.write(`
+    const printHtml = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>${selectedGroup.name} - Tour Timetable</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 2rem; color: #1f2937; line-height: 1.5; }
-          .header { border-bottom: 2px solid #0b5e34; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
-          .title { font-size: 24px; font-weight: 800; color: #0b5e34; margin: 0; }
-          .subtitle { font-size: 13px; color: #6b7280; margin-top: 4px; }
-          .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 13px; border: 1px solid #e5e7eb; }
-          .meta-label { color: #6b7280; font-size: 11px; text-transform: uppercase; font-weight: 600; }
-          .meta-val { font-weight: 700; color: #111827; }
-          .day-box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; page-break-inside: avoid; }
-          .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
-          .day-title { font-size: 15px; font-weight: 700; color: #0b5e34; }
-          .day-loc { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; background: #ecfdf5; color: #065f46; border-radius: 12px; }
-          .day-act { font-size: 13px; margin: 0 0 0.5rem 0; }
-          .tt-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 12px; }
-          .tt-table td { padding: 4px 8px; border-bottom: 1px solid #f3f4f6; }
-          .tt-time { width: 90px; font-weight: 700; color: #374151; font-family: monospace; }
-          .footer { margin-top: 2rem; border-top: 1px solid #e5e7eb; padding-top: 1rem; font-size: 11px; color: #9ca3af; text-align: center; }
-          @media print {
-            body { padding: 0.5cm; }
-            .no-print { display: none; }
-          }
+          @page { size: auto; margin: 12mm; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1f2937; line-height: 1.5; margin: 0; padding: 0; }
+          .header { border-bottom: 2px solid #065f46; padding-bottom: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end; }
+          .title { font-size: 24px; font-weight: 800; color: #065f46; margin: 0; }
+          .subtitle { font-size: 12px; color: #6b7280; margin-top: 4px; }
+          .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; background: #f9fafb; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.25rem; font-size: 12px; border: 1px solid #e5e7eb; }
+          .meta-label { color: #6b7280; font-size: 10px; text-transform: uppercase; font-weight: 600; }
+          .meta-val { font-weight: 700; color: #111827; margin-top: 2px; }
+          .day-box { border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.85rem; margin-bottom: 0.85rem; page-break-inside: avoid; }
+          .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e5e7eb; padding-bottom: 0.4rem; margin-bottom: 0.4rem; }
+          .day-title { font-size: 14px; font-weight: 700; color: #065f46; }
+          .day-loc { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; background: #ecfdf5; color: #065f46; border-radius: 4px; }
+          .day-act { font-size: 12px; margin: 0 0 0.4rem 0; }
+          .tt-table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 11px; }
+          .tt-table td { padding: 4px 6px; border-bottom: 1px solid #f3f4f6; }
+          .tt-time { width: 85px; font-weight: 700; color: #374151; font-family: monospace; }
+          .footer { margin-top: 2rem; border-top: 1px solid #e5e7eb; padding-top: 0.75rem; font-size: 10px; color: #94a3b8; text-align: center; }
         </style>
       </head>
       <body>
-        <div class="no-print" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <button onclick="window.close()" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Return to CRM / Close
-          </button>
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <span style="font-size: 12px; color: #64748b;">Tip: Press Esc or click Return to go back</span>
-            <button onclick="window.print()" style="background: #065f46; color: white; border: 1px solid #065f46; padding: 7px 18px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-              Print / Save as PDF
-            </button>
-          </div>
-        </div>
-        <script>window.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.close(); });</script>
         <div class="header">
           <div>
             <h1 class="title">AMJA TRAVELS</h1>
             <div class="subtitle">Official Pilgrimage Tour Schedule & Day-wise Timetable</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 16px; font-weight: 700; color: #111827;">${selectedGroup.name}</div>
+            <div style="font-size: 15px; font-weight: 700; color: #111827;">${selectedGroup.name}</div>
             <div class="subtitle">Tour Leader: ${selectedGroup.guide || 'Assigned Sheikh'}</div>
           </div>
         </div>
@@ -1250,10 +1227,10 @@ export default {
           </div>
         </div>
 
-        <h3 style="font-size: 16px; color: #111827; margin-bottom: 1rem;">Chronological Tour Schedule</h3>
+        <h3 style="font-size: 14px; color: #111827; margin-bottom: 0.75rem;">Chronological Tour Schedule</h3>
 
         ${itinerary.length === 0 ? `
-          <p style="color: #6b7280; font-size: 13px;">No itinerary days have been configured for this group.</p>
+          <p style="color: #6b7280; font-size: 12px;">No itinerary days have been configured for this group.</p>
         ` : itinerary.map(d => `
           <div class="day-box">
             <div class="day-header">
@@ -1261,7 +1238,7 @@ export default {
               <span class="day-loc">${d.location}</span>
             </div>
             <p class="day-act">${d.activity}</p>
-            ${d.note ? `<div style="font-size: 12px; color: #6b7280; margin-bottom: 0.5rem; font-style: italic;">Note: ${d.note}</div>` : ''}
+            ${d.note ? `<div style="font-size: 11px; color: #6b7280; margin-bottom: 0.4rem; font-style: italic;">Note: ${d.note}</div>` : ''}
             ${d.timetable && d.timetable.length > 0 ? `
               <table class="tt-table">
                 <tbody>
@@ -1278,11 +1255,34 @@ export default {
         `).join('')}
 
         <div class="footer">
-          Amja Travels (Pvt) Ltd • 24/7 Pilgrim Emergency Assistance • Hotline: +94 11 234 5678 / KSA: +966 50 123 4567
+          Amja Travels (Pvt) Ltd &bull; 24/7 Pilgrim Assistance &bull; Hotline: +94 11 234 5678 / KSA: +966 50 123 4567
         </div>
       </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(printHtml);
+    doc.close();
+
+    iframe.contentWindow.focus();
+    setTimeout(() => {
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    }, 250);
   }
 };
