@@ -10,6 +10,7 @@ import dashboardView from './views/dashboard.js';
 import customersView from './views/customers.js';
 import groupsView from './views/groups.js';
 import expensesView from './views/expenses.js';
+import reportsView from './views/reports.js';
 
 // Global Router State
 let activeViewName = 'dashboard';
@@ -17,7 +18,8 @@ const views = {
   dashboard: dashboardView,
   customers: customersView,
   groups: groupsView,
-  expenses: expensesView
+  expenses: expensesView,
+  reports: reportsView
 };
 
 // Global Notifications Toast Manager
@@ -107,6 +109,9 @@ async function navigateTo(viewName) {
   } else if (viewName === 'expenses') {
     titleEl.innerText = 'Expenses & Financial Logs';
     subtitleEl.innerText = 'Segregate pre-departure processing costs from on-tour accommodation/travel expenses.';
+  } else if (viewName === 'reports') {
+    titleEl.innerText = 'Date-wise Business Reports & Analytics Hub';
+    subtitleEl.innerText = 'Analyze date-wise pilgrim enrollments, active cohorts, cancellations, and financial settlements.';
   }
 
   // Render content

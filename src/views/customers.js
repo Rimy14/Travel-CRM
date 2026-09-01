@@ -92,6 +92,17 @@ export default {
                       <div class="customer-info-detail">
                         <span class="customer-name">${c.name}</span>
                         <span class="customer-meta">${c.phone} | ${c.email}</span>
+                        ${(() => {
+                          const sr = c.specialRequests || {};
+                          const tags = [];
+                          if (sr.wheelchair) tags.push('<span class="badge-sr" title="Wheelchair Required">♿ Wheelchair</span>');
+                          if (sr.diet) tags.push('<span class="badge-sr" title="Special Diabetic/Diet">🥗 Diet</span>');
+                          if (sr.elderly) tags.push('<span class="badge-sr" title="Senior Citizen Care">🧓 Elderly</span>');
+                          if (sr.groundFloor) tags.push('<span class="badge-sr" title="Ground Floor Room">🛏️ Low Floor</span>');
+                          if (sr.cot) tags.push('<span class="badge-sr" title="Child/Infant Cot">👶 Cot</span>');
+                          if (sr.notes) tags.push(`<span class="badge-sr" title="${sr.notes}">📝 ${sr.notes.length > 18 ? sr.notes.substring(0, 16) + '...' : sr.notes}</span>`);
+                          return tags.length > 0 ? `<div style="display: flex; gap: 0.25rem; flex-wrap: wrap; margin-top: 0.3rem;">${tags.join('')}</div>` : '';
+                        })()}
                       </div>
                     </div>
                   </td>
@@ -306,6 +317,32 @@ export default {
                 <input type="checkbox" id="doc-vaccination" ${customer?.documents?.vaccination ? 'checked' : ''}> Vaccination Complete
               </label>
             </div>
+
+            <!-- Special Requests Section -->
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-top: 1rem; margin-bottom: 0.5rem;">
+              Special Requests & Pilgrim Accessibility
+            </label>
+            <div class="doc-form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+              <label class="doc-form-checkbox">
+                <input type="checkbox" id="sr-wheelchair" ${customer?.specialRequests?.wheelchair ? 'checked' : ''}> ♿ Wheelchair Required
+              </label>
+              <label class="doc-form-checkbox">
+                <input type="checkbox" id="sr-diet" ${customer?.specialRequests?.diet ? 'checked' : ''}> 🥗 Diabetic / Special Diet
+              </label>
+              <label class="doc-form-checkbox">
+                <input type="checkbox" id="sr-elderly" ${customer?.specialRequests?.elderly ? 'checked' : ''}> 🧓 Senior Citizen Care
+              </label>
+              <label class="doc-form-checkbox">
+                <input type="checkbox" id="sr-groundfloor" ${customer?.specialRequests?.groundFloor ? 'checked' : ''}> 🛏️ Low / Ground Floor Room
+              </label>
+              <label class="doc-form-checkbox">
+                <input type="checkbox" id="sr-cot" ${customer?.specialRequests?.cot ? 'checked' : ''}> 👶 Child / Infant Cot
+              </label>
+            </div>
+            <div class="form-group" style="margin-top: 0.75rem;">
+              <label for="sr-notes" style="font-size: 0.8rem;">Additional Special Instructions / Medical Notes</label>
+              <input type="text" id="sr-notes" class="form-control" value="${customer?.specialRequests?.notes || ''}" placeholder="e.g. Needs assistance boarding flight, allergic to penicillin">
+            </div>
             
             ${customer?.cancellationReason ? `
               <div class="form-group">
@@ -355,6 +392,14 @@ export default {
           photo: modalOverlay.querySelector('#doc-photo').checked,
           visa: modalOverlay.querySelector('#doc-visa').checked,
           vaccination: modalOverlay.querySelector('#doc-vaccination').checked
+        },
+        specialRequests: {
+          wheelchair: modalOverlay.querySelector('#sr-wheelchair').checked,
+          diet: modalOverlay.querySelector('#sr-diet').checked,
+          elderly: modalOverlay.querySelector('#sr-elderly').checked,
+          groundFloor: modalOverlay.querySelector('#sr-groundfloor').checked,
+          cot: modalOverlay.querySelector('#sr-cot').checked,
+          notes: modalOverlay.querySelector('#sr-notes').value.trim()
         }
       };
 
