@@ -114,7 +114,7 @@ async function navigateTo(viewName) {
     subtitleEl.innerText = 'Establish groups of pilgrims, set pricing models, and coordinate tour capacity.';
   } else if (viewName === 'itinerary') {
     titleEl.innerText = 'Daily Itinerary & Timetable Planner';
-    subtitleEl.innerText = 'Build chronological daily schedules, apply 1-click templates, and generate prayer timetables.';
+    subtitleEl.innerText = 'Build chronological daily schedules, customize hourly prayer timetables, and print pilgrim leaflets.';
   } else if (viewName === 'flights') {
     titleEl.innerText = 'Flights & Ground Transport Logistics';
     subtitleEl.innerText = 'Track airline group bookings, PNRs, airport pickups, and Haramain bullet train transfers.';
