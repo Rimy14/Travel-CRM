@@ -1,19 +1,17 @@
 // ----------------------------------------------------
-// Amja Travels CRM - Hotels & Room Allocation (hotels.js)
+// Amja Travels CRM - Hotels & Room Allocator (hotels.js)
 // ----------------------------------------------------
 
 import { 
   getHotels, 
-  saveHotel, 
-  deleteHotel,
-  getRoomAllocations,
-  saveRoomAllocation,
+  getRoomAllocations, 
+  saveRoomAllocation, 
   deleteRoomAllocation,
   getCustomers,
-  getGroups
+  getGroups 
 } from '../db.js';
 
-let activeCityFilter = 'all'; // 'all', 'Makkah', 'Madinah'
+let activeCityFilter = 'all'; // 'all', 'makkah', 'medina'
 let selectedCohortFilter = 'all';
 
 export default {
@@ -27,25 +25,24 @@ export default {
 
     // Filter hotels by city
     const filteredHotels = hotels.filter(h => {
-      if (activeCityFilter !== 'all' && h.city !== activeCityFilter) return false;
-      return true;
+      if (activeCityFilter === 'all') return true;
+      return h.city.toLowerCase() === activeCityFilter.toLowerCase();
     });
 
-    // Calculate rooming statistics
-    let totalRooms = 0;
+    // Compute occupancy
     let totalBeds = 0;
+    let occupiedBeds = 0;
     hotels.forEach(h => {
       (h.rooms || []).forEach(r => {
-        totalRooms++;
-        totalBeds += (r.capacity || 0);
+        totalBeds += r.capacity;
       });
     });
-
-    const allocatedCount = allocations.length;
-    const unallocatedCount = Math.max(0, activePilgrims.length - allocatedCount);
+    occupiedBeds = allocations.length;
+    const vacancy = totalBeds - occupiedBeds;
+    const occupancyPercent = totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0;
 
     container.innerHTML = `
-      <!-- TOP SUMMARY KPI METRICS -->
+      <!-- TOP HOTEL METRICS -->
       <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 1.25rem;">
         
         <div class="stat-card">
@@ -53,9 +50,9 @@ export default {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>
           </div>
           <div class="stat-info">
-            <span class="stat-title">Partnered Hotels</span>
+            <span class="stat-title">Contracted Hotels</span>
             <h3 class="stat-number">${hotels.length} Properties</h3>
-            <div class="stat-sub">Makkah & Madinah contracts</div>
+            <div class="stat-sub">Makkah & Madinah Luxury Contracts</div>
           </div>
         </div>
 
@@ -64,20 +61,9 @@ export default {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"></path><path d="M2 8h18a2 2 0 0 1 2 2v10"></path><path d="M2 17h20"></path><path d="M6 8v9"></path></svg>
           </div>
           <div class="stat-info">
-            <span class="stat-title">Total Bed Capacity</span>
-            <h3 class="stat-number">${totalBeds} Beds</h3>
-            <div class="stat-sub">${totalRooms} Configured Rooms</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
-          </div>
-          <div class="stat-info">
-            <span class="stat-title">Allocated Pilgrims</span>
-            <h3 class="stat-number" style="color: #059669;">${allocatedCount} Assigned</h3>
-            <div class="stat-sub">${Math.round((allocatedCount / (activePilgrims.length || 1)) * 100)}% Rooming Rate</div>
+            <span class="stat-title">Bed Occupancy</span>
+            <h3 class="stat-number" style="color: #059669;">${occupiedBeds} / ${totalBeds} Beds</h3>
+            <div class="stat-sub">${occupancyPercent}% Reserved Across Cohorts</div>
           </div>
         </div>
 
@@ -86,107 +72,106 @@ export default {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
           </div>
           <div class="stat-info">
-            <span class="stat-title">Pending Rooming</span>
-            <h3 class="stat-number" style="color: ${unallocatedCount > 0 ? '#b45309' : '#059669'};">${unallocatedCount} Pilgrims</h3>
-            <div class="stat-sub">Require room assignment</div>
+            <span class="stat-title">Vacant Bed Slots</span>
+            <h3 class="stat-number" style="color: #d97706;">${vacancy} Beds</h3>
+            <div class="stat-sub">Available for new pilgrim bookings</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-title">Pilgrims to Place</span>
+            <h3 class="stat-number" style="color: ${activePilgrims.length - occupiedBeds > 0 ? '#b45309' : '#059669'};">
+              ${Math.max(0, activePilgrims.length - occupiedBeds)} Unassigned
+            </h3>
+            <div class="stat-sub">Requiring room allocation</div>
           </div>
         </div>
 
       </div>
 
-      <!-- CONTROLS & FILTER TOOLBAR -->
+      <!-- FILTER & ACTIONS BAR -->
       <div class="filter-card" style="margin-bottom: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           
-          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <!-- City Segmented Control -->
+          <!-- City Tabs -->
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div class="segmented-control" style="background: #f1f5f9; padding: 3px; border-radius: 6px; display: inline-flex; gap: 2px;">
-              <button class="btn-seg ${activeCityFilter === 'all' ? 'active' : ''}" data-city="all">All Cities</button>
-              <button class="btn-seg ${activeCityFilter === 'Makkah' ? 'active' : ''}" data-city="Makkah">Makkah Al-Mukarramah</button>
-              <button class="btn-seg ${activeCityFilter === 'Madinah' ? 'active' : ''}" data-city="Madinah">Madinah Al-Munawwarah</button>
-            </div>
-
-            <!-- Cohort Selector -->
-            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem;">
-              <span style="color: var(--text-muted); font-weight: 500;">Filter Cohort:</span>
-              <select id="filter-cohort-select" style="padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8125rem;">
-                <option value="all">All Tour Cohorts</option>
-                ${groups.map(g => `<option value="${g.id}" ${selectedCohortFilter === g.id ? 'selected' : ''}>${g.name}</option>`).join('')}
-              </select>
+              <button class="btn-seg ${activeCityFilter === 'all' ? 'active' : ''}" data-city="all">All Cities (${hotels.length})</button>
+              <button class="btn-seg ${activeCityFilter === 'makkah' ? 'active' : ''}" data-city="makkah">Makkah Al-Mukarramah</button>
+              <button class="btn-seg ${activeCityFilter === 'medina' ? 'active' : ''}" data-city="medina">Madinah Al-Munawwarah</button>
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary" id="btn-print-rooming" style="display: inline-flex; align-items: center; gap: 6px;">
+          <!-- Actions -->
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btn-print-rooming-list" style="display: inline-flex; align-items: center; gap: 6px;">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-              Print Hotel Rooming List
-            </button>
-            <button class="btn btn-primary" id="btn-add-hotel" style="display: inline-flex; align-items: center; gap: 6px;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              + Add Hotel Property
+              Print Saudi Hotel Rooming Manifest
             </button>
           </div>
 
         </div>
       </div>
 
-      <!-- HOTELS AND ROOM GRIDS -->
+      <!-- HOTEL PROPERTIES & ROOM ALLOCATION GRID -->
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        ${filteredHotels.length === 0 ? `
-          <div class="card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-            No hotel properties found for this filter. Click "+ Add Hotel Property" to register hotel contracts.
-          </div>
-        ` : filteredHotels.map(hotel => {
-          const hotelRooms = hotel.rooms || [];
-          const hotelAllocations = allocations.filter(a => a.hotelId === hotel.id);
-          const totalHotelBeds = hotelRooms.reduce((s, r) => s + (r.capacity || 0), 0);
-          const occupiedHotelBeds = hotelAllocations.length;
+        ${filteredHotels.map(hotel => {
+          const hotelAllocs = allocations.filter(a => a.hotelId === hotel.id);
+          const hotelBeds = (hotel.rooms || []).reduce((sum, r) => sum + r.capacity, 0);
+          const hotelOccupied = hotelAllocs.length;
 
           return `
             <div class="card" style="margin-bottom: 0;">
               
               <!-- Hotel Header -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                 <div>
-                  <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                     <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0;">${hotel.name}</h2>
-                    <span class="badge ${hotel.city === 'Makkah' ? 'badge-hajj' : 'badge-umrah'}">${hotel.city}</span>
+                    <span class="badge ${hotel.city.toLowerCase() === 'makkah' ? 'badge-active' : 'badge-umrah'}" style="font-size: 0.7rem; text-transform: capitalize;">
+                      ${hotel.city}
+                    </span>
                     <span style="font-size: 0.75rem; color: #d97706; font-weight: 600;">★ ${hotel.stars}-Star</span>
                   </div>
-                  <div style="font-size: 0.8125rem; color: var(--text-muted); display: flex; gap: 1.25rem; flex-wrap: wrap;">
-                    <span>📍 <strong>Proximity:</strong> ${hotel.distanceHaram}</span>
-                    <span>🏢 <strong>Address:</strong> ${hotel.address}</span>
-                    <span>📞 <strong>Reception:</strong> ${hotel.contact}</span>
+                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <span>📍 <strong>Proximity:</strong> ${hotel.distanceToHaram}</span>
+                    <span>🏨 <strong>Address:</strong> ${hotel.address}</span>
+                    <span>📞 <strong>Reception:</strong> ${hotel.phone || 'N/A'}</span>
                   </div>
                 </div>
 
                 <div style="text-align: right;">
                   <div style="font-size: 0.8125rem; font-weight: 600; color: var(--text-main);">
-                    Occupancy: <span style="color: #065f46;">${occupiedHotelBeds} / ${totalHotelBeds} Beds</span>
+                    Occupancy: <span style="color: #065f46;">${hotelOccupied} / ${hotelBeds} Beds</span>
                   </div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">
-                    ${hotelRooms.length} Rooms configured
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">
+                    ${hotel.rooms?.length || 0} Rooms configured
                   </div>
                 </div>
               </div>
 
               <!-- Rooms Grid -->
               <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-                ${hotelRooms.map(room => {
-                  const roomAllocs = hotelAllocations.filter(a => a.roomId === room.id);
+                ${(hotel.rooms || []).map(room => {
+                  const roomAllocs = hotelAllocs.filter(a => a.roomId === room.id);
                   const isFull = roomAllocs.length >= room.capacity;
-                  
+
                   return `
-                    <div style="background: #f8fafc; border: 1px solid ${isFull ? '#cbd5e1' : '#e2e8f0'}; border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; justify-content: space-between;">
                       <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
+                        
+                        <!-- Room Header -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
                           <div>
-                            <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Room ${room.roomNumber}</span>
-                            <span style="font-size: 0.7rem; color: var(--text-muted); margin-left: 4px;">(${room.floor})</span>
+                            <strong style="font-size: 0.9rem; color: var(--text-main);">Room ${room.roomNumber}</strong>
+                            <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 4px;">(${room.floor})</span>
                           </div>
-                          <span class="badge" style="background: #ffffff; border: 1px solid #cbd5e1; font-size: 0.68rem;">
-                            ${room.type} (${roomAllocs.length}/${room.capacity} Beds)
+                          <span class="badge" style="background: ${isFull ? '#fee2e2' : '#ecfdf5'}; color: ${isFull ? '#991b1b' : '#065f46'}; border: 1px solid ${isFull ? '#fecaca' : '#a7f3d0'}; font-size: 0.68rem;">
+                            ${room.roomType} (${roomAllocs.length}/${room.capacity} Beds)
                           </span>
                         </div>
 
@@ -233,52 +218,6 @@ export default {
           `;
         }).join('')}
       </div>
-
-      <!-- MODAL: ASSIGN PILGRIM TO ROOM -->
-      <div class="modal" id="modal-assign-room" style="display: none;">
-        <div class="modal-content" style="max-width: 480px;">
-          <div class="modal-header">
-            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Assign Pilgrim to Room</h3>
-            <button class="modal-close" id="btn-close-assign-modal">&times;</button>
-          </div>
-          <form id="form-assign-room">
-            <div class="modal-body">
-              <input type="hidden" id="assign-hotel-id" />
-              <input type="hidden" id="assign-room-id" />
-              <input type="hidden" id="assign-bed-slot" />
-
-              <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1rem; font-size: 0.8125rem;">
-                <div>Hotel: <strong id="assign-disp-hotel"></strong></div>
-                <div>Room: <strong id="assign-disp-room"></strong> &bull; Bed Slot: <strong id="assign-disp-slot"></strong></div>
-              </div>
-
-              <div class="form-group">
-                <label>Select Pilgrim Traveler *</label>
-                <select id="assign-pilgrim-select" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                  <option value="">-- Choose unassigned pilgrim --</option>
-                  ${activePilgrims.map(p => {
-                    const isAllocated = allocations.some(a => a.customerId === p.id);
-                    return `<option value="${p.id}" data-name="${p.name}">
-                      ${p.name} (${p.packageType.toUpperCase()}) ${isAllocated ? '⚠️ (Already in another room)' : '✓ Available'}
-                    </option>`;
-                  }).join('')}
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Special Rooming Note / Requests</label>
-                <input type="text" id="assign-notes" placeholder="e.g. Near elevator, Family sharing preference" />
-              </div>
-            </div>
-
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" id="btn-cancel-assign">Cancel</button>
-              <button type="submit" class="btn btn-primary">Confirm Allocation</button>
-            </div>
-          </form>
-          </form>
-        </div>
-      </div>
     `;
 
     this.bindEvents(container, hotels, allocations, customers, groups);
@@ -293,15 +232,6 @@ export default {
       });
     });
 
-    // Cohort filter selector
-    const cohortSelect = container.querySelector('#filter-cohort-select');
-    if (cohortSelect) {
-      cohortSelect.addEventListener('change', (e) => {
-        selectedCohortFilter = e.target.value;
-        this.render(container);
-      });
-    }
-
     // Unassign bed button
     container.querySelectorAll('.btn-remove-alloc').forEach(btn => {
       btn.addEventListener('click', async (e) => {
@@ -315,7 +245,6 @@ export default {
     });
 
     // Assign bed button
-    const assignModal = container.querySelector('#modal-assign-room');
     container.querySelectorAll('.btn-assign-bed').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const hotelId = e.target.getAttribute('data-hotel-id');
@@ -324,154 +253,182 @@ export default {
         const roomNum = e.target.getAttribute('data-room-num');
         const slot = e.target.getAttribute('data-slot');
 
-        container.querySelector('#assign-hotel-id').value = hotelId;
-        container.querySelector('#assign-room-id').value = roomId;
-        container.querySelector('#assign-bed-slot').value = slot;
-        container.querySelector('#assign-disp-hotel').innerText = hotelName;
-        container.querySelector('#assign-disp-room').innerText = `Room ${roomNum}`;
-        container.querySelector('#assign-disp-slot').innerText = `Bed #${slot}`;
-
-        assignModal.style.display = 'flex';
+        this.openAssignBedModal(container, hotelId, hotelName, roomId, roomNum, slot, customers, allocations);
       });
     });
 
-    // Close assign modal
-    const closeAssign = () => { assignModal.style.display = 'none'; };
-    container.querySelector('#btn-close-assign-modal').addEventListener('click', closeAssign);
-    container.querySelector('#btn-cancel-assign').addEventListener('click', closeAssign);
-
-    // Submit room assignment
-    const assignForm = container.querySelector('#form-assign-room');
-    if (assignForm) {
-      assignForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const hotelId = container.querySelector('#assign-hotel-id').value;
-        const roomId = container.querySelector('#assign-room-id').value;
-        const bedSlot = container.querySelector('#assign-bed-slot').value;
-        const select = container.querySelector('#assign-pilgrim-select');
-        const customerId = select.value;
-        const customerName = select.options[select.selectedIndex].getAttribute('data-name');
-        const notes = container.querySelector('#assign-notes').value;
-
-        if (!customerId) {
-          alert('Please select a pilgrim to assign.');
-          return;
-        }
-
-        await saveRoomAllocation({
-          hotelId,
-          roomId,
-          bedSlot,
-          customerId,
-          customerName,
-          notes
-        });
-
-        window.showNotification(`Assigned ${customerName} successfully!`, 'success');
-        closeAssign();
-        this.render(container);
-      });
-    }
-
-    // Print Hotel Rooming List
-    const btnPrint = container.querySelector('#btn-print-rooming');
+    // Print Manifest
+    const btnPrint = container.querySelector('#btn-print-rooming-list');
     if (btnPrint) {
       btnPrint.addEventListener('click', () => {
-        this.printRoomingList(hotels, allocations, customers);
+        this.printRoomingList(hotels, allocations, customers, groups);
       });
     }
   },
 
-  // Direct In-page Print for Hotel Rooming List
-  printRoomingList(hotels, allocations, customers) {
+  // Modal: Assign Pilgrim to Room (Appended to document.body)
+  openAssignBedModal(container, hotelId, hotelName, roomId, roomNum, slot, customers, allocations) {
+    const activePilgrims = customers.filter(c => c.status !== 'cancelled');
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay active';
+    modalOverlay.id = 'assign-room-modal-overlay';
+
+    modalOverlay.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Assign Pilgrim to Room</h3>
+          <button class="modal-close" id="btn-close-assign-modal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="form-assign-modal">
+          <div class="modal-body">
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1rem; font-size: 0.8125rem;">
+              <div>Hotel: <strong>${hotelName}</strong></div>
+              <div>Room: <strong>Room ${roomNum}</strong> &bull; Bed Slot: <strong>Bed #${slot}</strong></div>
+            </div>
+
+            <div class="form-group">
+              <label>Select Pilgrim Traveler *</label>
+              <select id="modal-pilgrim-select" class="form-control" required>
+                <option value="">-- Choose unassigned pilgrim --</option>
+                ${activePilgrims.map(p => {
+                  const isAllocated = allocations.some(a => a.customerId === p.id);
+                  return `<option value="${p.id}" data-name="${p.name}">
+                    ${p.name} (${p.packageType.toUpperCase()}) ${isAllocated ? '⚠️ (Already in another room)' : '✓ Available'}
+                  </option>`;
+                }).join('')}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Special Rooming Note / Requests</label>
+              <input type="text" id="modal-assign-notes" class="form-control" placeholder="e.g. Near elevator, Family sharing preference" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-assign-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Confirm Allocation</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    const closeModal = () => {
+      modalOverlay.classList.remove('active');
+      setTimeout(() => modalOverlay.remove(), 200);
+    };
+
+    modalOverlay.querySelector('#btn-close-assign-modal').addEventListener('click', closeModal);
+    modalOverlay.querySelector('#btn-cancel-assign-modal').addEventListener('click', closeModal);
+
+    modalOverlay.querySelector('#form-assign-modal').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const select = modalOverlay.querySelector('#modal-pilgrim-select');
+      const customerId = select.value;
+      const customerName = select.options[select.selectedIndex].getAttribute('data-name');
+      const notes = modalOverlay.querySelector('#modal-assign-notes').value;
+
+      if (!customerId) {
+        alert('Please select a pilgrim to assign.');
+        return;
+      }
+
+      await saveRoomAllocation({
+        hotelId,
+        roomId,
+        bedSlot: slot,
+        customerId,
+        customerName,
+        notes
+      });
+
+      window.showNotification(`Assigned ${customerName} successfully!`, 'success');
+      closeModal();
+      this.render(container);
+    });
+  },
+
+  // Direct In-page Print for Saudi Hotel Rooming Manifest
+  printRoomingList(hotels, allocations, customers, groups) {
     const printHtml = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Amja Travels - Official Hotel Rooming List</title>
+        <title>Amja Travels - Saudi Hotel Rooming Manifest</title>
         <style>
-          @page { size: auto; margin: 12mm; }
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.5; margin: 0; padding: 0; }
-          .header { border-bottom: 2px solid #065f46; padding-bottom: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end; }
-          .title { font-size: 22px; font-weight: 800; color: #065f46; margin: 0; letter-spacing: -0.02em; }
-          .sub { font-size: 11px; color: #64748b; margin-top: 3px; }
-          .meta { font-size: 11px; color: #475569; margin-bottom: 1.25rem; background: #f8fafc; padding: 0.6rem 0.85rem; border-radius: 6px; border: 1px solid #e2e8f0; }
-          table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 0.75rem; margin-bottom: 1.5rem; }
-          th { background: #f8fafc; text-align: left; padding: 6px 8px; border-bottom: 1px solid #cbd5e1; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em; }
-          td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; }
-          .hotel-title { font-size: 14px; font-weight: 700; color: #065f46; margin-top: 1.5rem; margin-bottom: 0.4rem; border-left: 4px solid #065f46; padding-left: 8px; }
-          .footer { margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem; font-size: 10px; color: #94a3b8; text-align: center; }
+          @page { size: landscape; margin: 10mm; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.4; margin: 0; padding: 0; }
+          .header { border-bottom: 2px solid #065f46; padding-bottom: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end; }
+          .title { font-size: 20px; font-weight: 800; color: #065f46; margin: 0; }
+          .sub { font-size: 10px; color: #64748b; }
+          table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 1.5rem; }
+          th { background: #f1f5f9; text-align: left; padding: 6px 8px; border: 1px solid #cbd5e1; font-weight: 700; color: #334155; text-transform: uppercase; font-size: 10px; }
+          td { padding: 6px 8px; border: 1px solid #cbd5e1; vertical-align: top; }
+          .footer { margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; font-size: 9px; color: #94a3b8; text-align: center; }
         </style>
       </head>
       <body>
         <div class="header">
           <div>
-            <h1 class="title">AMJA TRAVELS</h1>
-            <div class="sub">Official Pilgrimage Hotel Rooming & Reception Manifest</div>
+            <h1 class="title">AMJA TRAVELS &bull; SAUDI HOTEL ROOMING MANIFEST</h1>
+            <div class="sub">Official Pilgrimage Hotel Reception & Check-in Manifest &bull; Generated: ${new Date().toLocaleDateString()}</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">Hotel Rooming List</div>
-            <div class="sub">Generated: ${new Date().toLocaleDateString()}</div>
+            <div style="font-weight: 700; color: #065f46;">Makkah & Madinah Contracts</div>
+            <div class="sub">Total Allocations: ${allocations.length} Pilgrims</div>
           </div>
         </div>
 
-        <div class="meta">
-          <strong>Document Purpose:</strong> Saudi Hotel Front Desk Check-in & Key Distribution Manifest &bull; 
-          <strong>Total Assigned Beds:</strong> ${allocations.length} Pilgrims
-        </div>
-
-        ${hotels.map(h => {
-          const hotelAllocs = allocations.filter(a => a.hotelId === h.id);
+        ${hotels.map(hotel => {
+          const hotelAllocs = allocations.filter(a => a.hotelId === hotel.id);
           return `
-            <div class="hotel-title">${h.name} (${h.city}) &mdash; ${h.distanceHaram}</div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Room No</th>
-                  <th>Floor</th>
-                  <th>Room Type</th>
-                  <th>Bed Slot</th>
-                  <th>Pilgrim Name</th>
-                  <th>Passport / ID</th>
-                  <th>Special Requests</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${(h.rooms || []).map(r => {
-                  const roomAllocs = hotelAllocs.filter(a => a.roomId === r.id);
-                  if (roomAllocs.length === 0) {
-                    return `
-                      <tr>
-                        <td><strong>Room ${r.roomNumber}</strong></td>
-                        <td>${r.floor}</td>
-                        <td>${r.type}</td>
-                        <td colspan="4" style="color: #94a3b8; font-style: italic;">All ${r.capacity} Beds Vacant</td>
-                      </tr>
-                    `;
-                  }
-                  return roomAllocs.map((alloc, idx) => {
-                    const cust = customers.find(c => c.id === alloc.customerId);
-                    const sr = cust && cust.specialRequests ? Object.keys(cust.specialRequests).filter(k => cust.specialRequests[k] === true).join(', ') : 'None';
-                    return `
-                      <tr>
-                        <td><strong>Room ${r.roomNumber}</strong></td>
-                        <td>${r.floor}</td>
-                        <td>${r.type}</td>
-                        <td>Bed #${alloc.bedSlot || (idx + 1)}</td>
-                        <td><strong>${alloc.customerName}</strong></td>
-                        <td>${cust ? cust.phone : 'N/A'}</td>
-                        <td>${sr || 'None'}</td>
-                      </tr>
-                    `;
-                  }).join('');
-                }).join('')}
-              </tbody>
-            </table>
+            <div style="margin-bottom: 1.5rem; page-break-inside: avoid;">
+              <div style="background: #065f46; color: white; padding: 6px 10px; font-weight: 700; font-size: 12px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between;">
+                <span>${hotel.name} (${hotel.city.toUpperCase()}) &bull; ${hotel.stars}★</span>
+                <span>Proximity: ${hotel.distanceToHaram} &bull; Reception: ${hotel.phone || 'N/A'}</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 70px;">Room #</th>
+                    <th style="width: 90px;">Floor / Type</th>
+                    <th style="width: 50px;">Bed #</th>
+                    <th>Pilgrim Full Name</th>
+                    <th>Passport / Contact</th>
+                    <th>Special Rooming Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(hotel.rooms || []).map(room => {
+                    const roomAllocs = hotelAllocs.filter(a => a.roomId === room.id);
+                    return Array.from({ length: room.capacity }).map((_, slotIdx) => {
+                      const alloc = roomAllocs[slotIdx];
+                      const cust = alloc ? customers.find(c => c.id === alloc.customerId) : null;
+                      return `
+                        <tr>
+                          ${slotIdx === 0 ? `<td rowspan="${room.capacity}" style="font-weight: 700; background: #fafafa;">${room.roomNumber}</td>` : ''}
+                          ${slotIdx === 0 ? `<td rowspan="${room.capacity}" style="background: #fafafa;">${room.floor}<br><span style="color: #64748b; font-size: 9px;">${room.roomType}</span></td>` : ''}
+                          <td style="text-align: center; font-family: monospace;">#${slotIdx + 1}</td>
+                          <td><strong>${alloc ? alloc.customerName : '<span style="color: #94a3b8; font-style: italic;">Vacant Bed</span>'}</strong></td>
+                          <td style="font-family: monospace; font-size: 10px;">${cust ? cust.phone : '-'}</td>
+                          <td style="font-size: 10px; color: #475569;">${alloc ? (alloc.notes || '-') : '-'}</td>
+                        </tr>
+                      `;
+                    }).join('');
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
           `;
         }).join('')}
 
         <div class="footer">
-          Amja Travels (Pvt) Ltd &bull; Confidential Hotel Rooming Manifest &bull; Reception Contact: +94 11 234 5678
+          Amja Travels (Pvt) Ltd &bull; 24/7 Hotel Operations Coordination &bull; Hotline: +94 11 234 5678 / KSA: +966 50 123 4567
         </div>
       </body>
       </html>

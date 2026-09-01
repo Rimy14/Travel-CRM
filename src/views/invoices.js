@@ -106,7 +106,7 @@ export default {
 
             <!-- Search input -->
             <div style="position: relative;">
-              <input type="text" id="input-search-invoices" placeholder="Search pilgrim or phone..." value="${invoiceSearchQuery}" style="padding: 6px 12px; font-size: 0.8125rem; border: 1px solid var(--border-color); border-radius: 6px; width: 220px;" />
+              <input type="text" id="input-search-invoices" class="form-control" placeholder="Search pilgrim or phone..." value="${invoiceSearchQuery}" style="width: 220px; font-size: 0.8125rem;" />
             </div>
           </div>
 
@@ -240,69 +240,6 @@ export default {
           </table>
         </div>
       </div>
-
-      <!-- MODAL: RECORD PAYMENT -->
-      <div class="modal" id="modal-payment" style="display: none;">
-        <div class="modal-content" style="max-width: 480px;">
-          <div class="modal-header">
-            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Record Pilgrim Payment</h3>
-            <button class="modal-close" id="btn-close-pay-modal">&times;</button>
-          </div>
-          <form id="form-payment">
-            <div class="modal-body">
-              <div class="form-group">
-                <label>Select Pilgrim Traveler *</label>
-                <select id="pay-pilgrim-select" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                  <option value="">-- Choose pilgrim --</option>
-                  ${activePilgrims.map(p => {
-                    const due = (p.price || 0) - (p.paid || 0);
-                    return `<option value="${p.id}" data-name="${p.name}" data-due="${due}">
-                      ${p.name} (Due: LKR ${due.toLocaleString()})
-                    </option>`;
-                  }).join('')}
-                </select>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <div class="form-group">
-                  <label>Payment Amount (LKR) *</label>
-                  <input type="number" id="pay-amount" required min="1000" step="500" placeholder="e.g. 200000" />
-                </div>
-                <div class="form-group">
-                  <label>Payment Date *</label>
-                  <input type="date" id="pay-date" required value="${new Date().toISOString().substring(0, 10)}" />
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <div class="form-group">
-                  <label>Payment Method *</label>
-                  <select id="pay-method">
-                    <option value="Bank Transfer">Bank Transfer / Online</option>
-                    <option value="Cash">Cash (Office Collection)</option>
-                    <option value="Credit / Debit Card">Credit / Debit Card</option>
-                    <option value="Cheque">Cheque</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Bank Reference / Slip No</label>
-                  <input type="text" id="pay-ref" placeholder="e.g. BOC-TX-8823" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Payment Notes / Milestones</label>
-                <input type="text" id="pay-notes" placeholder="e.g. 2nd Installment - Visa Fee payment" />
-              </div>
-            </div>
-
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" id="btn-cancel-pay">Cancel</button>
-              <button type="submit" class="btn btn-primary">Generate Receipt & Save</button>
-            </div>
-          </form>
-        </div>
-      </div>
     `;
 
     this.bindEvents(container, customers, payments, groups);
@@ -326,62 +263,22 @@ export default {
       });
     }
 
-    // Modal handling
-    const payModal = container.querySelector('#modal-payment');
-    const openPay = () => { payModal.style.display = 'flex'; };
-    const closePay = () => { payModal.style.display = 'none'; };
-    container.querySelector('#btn-quick-payment').addEventListener('click', openPay);
-    container.querySelector('#btn-close-pay-modal').addEventListener('click', closePay);
-    container.querySelector('#btn-cancel-pay').addEventListener('click', closePay);
+    // Quick Action button
+    const btnQuickPay = container.querySelector('#btn-quick-payment');
+    if (btnQuickPay) {
+      btnQuickPay.addEventListener('click', () => {
+        this.openPaymentModal(container, customers, null, null);
+      });
+    }
 
     // Single Pilgrim "+ Pay" Button
     container.querySelectorAll('.btn-record-single-pay').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const custId = e.currentTarget.getAttribute('data-cust-id');
         const due = e.currentTarget.getAttribute('data-due');
-        const select = container.querySelector('#pay-pilgrim-select');
-        select.value = custId;
-        if (due && Number(due) > 0) {
-          container.querySelector('#pay-amount').value = due;
-        }
-        openPay();
+        this.openPaymentModal(container, customers, custId, due);
       });
     });
-
-    // Submit Payment
-    const formPay = container.querySelector('#form-payment');
-    if (formPay) {
-      formPay.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const select = container.querySelector('#pay-pilgrim-select');
-        const customerId = select.value;
-        const customerName = select.options[select.selectedIndex].getAttribute('data-name');
-        const amount = Number(container.querySelector('#pay-amount').value);
-        const paymentDate = container.querySelector('#pay-date').value;
-        const paymentMethod = container.querySelector('#pay-method').value;
-        const reference = container.querySelector('#pay-ref').value;
-        const notes = container.querySelector('#pay-notes').value;
-
-        if (!customerId || !amount) {
-          alert('Please select pilgrim and enter valid payment amount.');
-          return;
-        }
-
-        const newPayment = await recordPayment({
-          customerId,
-          customerName,
-          amount,
-          paymentDate,
-          paymentMethod,
-          reference,
-          notes
-        });
-
-        window.showNotification(`Payment recorded! Receipt: ${newPayment.receiptNo}`, 'success');
-        closePay();
-        this.render(container);
-      });
-    }
 
     // Print Official Receipt
     container.querySelectorAll('.btn-print-receipt').forEach(btn => {
@@ -403,6 +300,121 @@ export default {
         const pilgrim = customers.find(c => c.id === pay.customerId) || { name: pay.customerName, phone: 'N/A', packageType: 'Hajj/Umrah', price: pay.amount, paid: pay.amount };
         this.printOfficialReceipt(pilgrim, pay.receiptNo, [pay], groups);
       });
+    });
+  },
+
+  // Modal: Record Payment (Appended to document.body)
+  openPaymentModal(container, customers, targetCustId = null, targetDue = null) {
+    const activePilgrims = customers.filter(c => c.status !== 'cancelled');
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay active';
+    modalOverlay.id = 'payment-modal-overlay';
+
+    modalOverlay.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Record Pilgrim Payment</h3>
+          <button class="modal-close" id="btn-close-pay-modal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="form-payment-modal">
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Select Pilgrim Traveler *</label>
+              <select id="modal-pay-pilgrim-select" class="form-control" required>
+                <option value="">-- Choose pilgrim --</option>
+                ${activePilgrims.map(p => {
+                  const due = (p.price || 0) - (p.paid || 0);
+                  const isSelected = targetCustId && p.id === targetCustId;
+                  return `<option value="${p.id}" data-name="${p.name}" data-due="${due}" ${isSelected ? 'selected' : ''}>
+                    ${p.name} (Due: LKR ${due.toLocaleString()})
+                  </option>`;
+                }).join('')}
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Payment Amount (LKR) *</label>
+                <input type="number" id="modal-pay-amount" class="form-control" required min="1000" step="500" value="${targetDue && Number(targetDue) > 0 ? targetDue : ''}" placeholder="e.g. 200000" />
+              </div>
+              <div class="form-group">
+                <label>Payment Date *</label>
+                <input type="date" id="modal-pay-date" class="form-control" required value="${new Date().toISOString().substring(0, 10)}" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Payment Method *</label>
+                <select id="modal-pay-method" class="form-control">
+                  <option value="Bank Transfer">Bank Transfer / Online</option>
+                  <option value="Cash">Cash (Office Collection)</option>
+                  <option value="Credit / Debit Card">Credit / Debit Card</option>
+                  <option value="Cheque">Cheque</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Bank Reference / Slip No</label>
+                <input type="text" id="modal-pay-ref" class="form-control" placeholder="e.g. BOC-TX-8823" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label>Payment Notes / Milestones</label>
+              <input type="text" id="modal-pay-notes" class="form-control" placeholder="e.g. 2nd Installment - Visa Fee payment" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-pay-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Generate Receipt & Save</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    const closeModal = () => {
+      modalOverlay.classList.remove('active');
+      setTimeout(() => modalOverlay.remove(), 200);
+    };
+
+    modalOverlay.querySelector('#btn-close-pay-modal').addEventListener('click', closeModal);
+    modalOverlay.querySelector('#btn-cancel-pay-modal').addEventListener('click', closeModal);
+
+    modalOverlay.querySelector('#form-payment-modal').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const select = modalOverlay.querySelector('#modal-pay-pilgrim-select');
+      const customerId = select.value;
+      const customerName = select.options[select.selectedIndex].getAttribute('data-name');
+      const amount = Number(modalOverlay.querySelector('#modal-pay-amount').value);
+      const paymentDate = modalOverlay.querySelector('#modal-pay-date').value;
+      const paymentMethod = modalOverlay.querySelector('#modal-pay-method').value;
+      const reference = modalOverlay.querySelector('#modal-pay-ref').value;
+      const notes = modalOverlay.querySelector('#modal-pay-notes').value;
+
+      if (!customerId || !amount) {
+        alert('Please select pilgrim and enter valid payment amount.');
+        return;
+      }
+
+      const newPayment = await recordPayment({
+        customerId,
+        customerName,
+        amount,
+        paymentDate,
+        paymentMethod,
+        reference,
+        notes
+      });
+
+      window.showNotification(`Payment recorded! Receipt: ${newPayment.receiptNo}`, 'success');
+      closeModal();
+      this.render(container);
     });
   },
 

@@ -193,75 +193,14 @@ export default {
                 </button>
 
                 <div style="display: flex; gap: 0.35rem;">
-                  <button class="btn btn-secondary btn-edit-group" data-group-id="${group.id}" style="font-size: 0.72rem; padding: 3px 8px;">Edit</button>
-                  <button class="btn btn-secondary btn-delete-group" data-group-id="${group.id}" style="font-size: 0.72rem; padding: 3px 8px; color: #dc2626;">Delete</button>
+                  <button class="btn btn-secondary btn-edit-group" data-id="${group.id}" style="font-size: 0.72rem; padding: 3px 8px;">Edit</button>
+                  <button class="btn btn-secondary btn-delete-group" data-id="${group.id}" style="font-size: 0.72rem; padding: 3px 8px; color: #dc2626;">Delete</button>
                 </div>
               </div>
 
             </div>
           `;
         }).join('')}
-      </div>
-
-      <!-- MODAL: CREATE / EDIT GROUP -->
-      <div class="modal" id="modal-group" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-          <div class="modal-header">
-            <h3 id="modal-group-title" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Create Tour Cohort</h3>
-            <button class="modal-close" id="btn-close-group-modal">&times;</button>
-          </div>
-          <form id="form-group">
-            <div class="modal-body">
-              <input type="hidden" id="group-id" value="" />
-
-              <div class="form-group">
-                <label>Cohort / Group Name *</label>
-                <input type="text" id="group-name" required placeholder="e.g. Amja 14-Day Classic Umrah Group" />
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <div class="form-group">
-                  <label>Package Type *</label>
-                  <select id="group-type">
-                    <option value="umrah">Umrah Pilgrimage</option>
-                    <option value="hajj">Hajj Pilgrimage</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Target Capacity (Pax) *</label>
-                  <input type="number" id="group-capacity" required min="1" max="500" value="20" />
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <div class="form-group">
-                  <label>Departure Date</label>
-                  <input type="date" id="group-departure" />
-                </div>
-                <div class="form-group">
-                  <label>Return Date</label>
-                  <input type="date" id="group-arrival" />
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                <div class="form-group">
-                  <label>Base Price per Pilgrim (LKR) *</label>
-                  <input type="number" id="group-price" required min="0" step="1000" placeholder="e.g. 400000" />
-                </div>
-                <div class="form-group">
-                  <label>Tour Leader / Assigned Sheikh</label>
-                  <input type="text" id="group-guide" placeholder="e.g. Sheikh Abdul Rahman" />
-                </div>
-              </div>
-            </div>
-
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" id="btn-cancel-group">Cancel</button>
-              <button type="submit" class="btn btn-primary">Save Tour Cohort</button>
-            </div>
-          </form>
-        </div>
       </div>
     `;
 
@@ -285,94 +224,139 @@ export default {
       });
     });
 
-    // Group Modal handling
-    const groupModal = container.querySelector('#modal-group');
-    const openGroupModal = () => { groupModal.style.display = 'flex'; };
-    const closeGroupModal = () => { groupModal.style.display = 'none'; };
-
+    // Create Group Modal Trigger
     const btnCreateGroup = container.querySelector('#btn-create-group');
     if (btnCreateGroup) {
       btnCreateGroup.addEventListener('click', () => {
-        container.querySelector('#modal-group-title').innerText = 'Create Tour Cohort';
-        container.querySelector('#group-id').value = '';
-        container.querySelector('#group-name').value = '';
-        container.querySelector('#group-type').value = 'umrah';
-        container.querySelector('#group-capacity').value = '20';
-        container.querySelector('#group-departure').value = '';
-        container.querySelector('#group-arrival').value = '';
-        container.querySelector('#group-price').value = '';
-        container.querySelector('#group-guide').value = '';
-        openGroupModal();
+        this.openGroupModal(container);
       });
     }
 
-    container.querySelector('#btn-close-group-modal').addEventListener('click', closeGroupModal);
-    container.querySelector('#btn-cancel-group').addEventListener('click', closeGroupModal);
-
-    // Edit Group
+    // Edit Group Trigger
     container.querySelectorAll('.btn-edit-group').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const groupId = e.currentTarget.getAttribute('data-group-id');
+        const groupId = e.currentTarget.getAttribute('data-id');
         const group = groupList.find(g => g.id === groupId);
-        if (!group) return;
-
-        container.querySelector('#modal-group-title').innerText = 'Edit Tour Cohort';
-        container.querySelector('#group-id').value = group.id;
-        container.querySelector('#group-name').value = group.name;
-        container.querySelector('#group-type').value = group.type || 'umrah';
-        container.querySelector('#group-capacity').value = group.capacity || 20;
-        container.querySelector('#group-departure').value = group.departureDate || '';
-        container.querySelector('#group-arrival').value = group.arrivalDate || '';
-        container.querySelector('#group-price').value = group.basePrice || '';
-        container.querySelector('#group-guide').value = group.guide || '';
-        openGroupModal();
+        if (group) this.openGroupModal(container, group);
       });
     });
 
-    // Save Group
-    const formGroup = container.querySelector('#form-group');
-    if (formGroup) {
-      formGroup.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = container.querySelector('#group-id').value;
-        const name = container.querySelector('#group-name').value;
-        const type = container.querySelector('#group-type').value;
-        const capacity = Number(container.querySelector('#group-capacity').value);
-        const departureDate = container.querySelector('#group-departure').value;
-        const arrivalDate = container.querySelector('#group-arrival').value;
-        const basePrice = Number(container.querySelector('#group-price').value);
-        const guide = container.querySelector('#group-guide').value;
-
-        const existing = groupList.find(g => g.id === id);
-
-        await saveGroup({
-          id: id || undefined,
-          name,
-          type,
-          capacity,
-          departureDate,
-          arrivalDate,
-          basePrice,
-          guide,
-          itinerary: existing ? existing.itinerary : []
-        });
-
-        window.showNotification('Tour cohort saved successfully!', 'success');
-        closeGroupModal();
-        this.render(container);
-      });
-    }
-
-    // Delete Group
+    // Delete Group Trigger
     container.querySelectorAll('.btn-delete-group').forEach(btn => {
       btn.addEventListener('click', async (e) => {
-        const groupId = e.currentTarget.getAttribute('data-group-id');
+        const groupId = e.currentTarget.getAttribute('data-id');
         if (confirm('Delete this tour cohort? Enrolled pilgrims will be unassigned.')) {
           await deleteGroup(groupId);
           window.showNotification('Tour cohort deleted.', 'info');
           this.render(container);
         }
       });
+    });
+  },
+
+  // Modal: Create / Edit Group (Appended directly to document.body)
+  openGroupModal(container, group = null) {
+    const isEdit = !!group;
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay active';
+    modalOverlay.id = 'group-modal-overlay';
+
+    modalOverlay.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>${isEdit ? 'Edit Tour Cohort' : 'Create Tour Cohort'}</h3>
+          <button class="modal-close" id="btn-close-group-modal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="form-group-modal">
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Cohort / Group Name *</label>
+              <input type="text" id="g-name" class="form-control" value="${group?.name || ''}" required placeholder="e.g. Amja 14-Day Classic Umrah Group" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Package Type *</label>
+                <select id="g-type" class="form-control" required>
+                  <option value="umrah" ${group?.type === 'umrah' ? 'selected' : ''}>Umrah Pilgrimage</option>
+                  <option value="hajj" ${group?.type === 'hajj' ? 'selected' : ''}>Hajj Pilgrimage</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Target Capacity (Pax) *</label>
+                <input type="number" id="g-capacity" class="form-control" value="${group?.capacity || 20}" required min="1" max="500" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Departure Date</label>
+                <input type="date" id="g-departure" class="form-control" value="${group?.departureDate || ''}" />
+              </div>
+              <div class="form-group">
+                <label>Return Date</label>
+                <input type="date" id="g-arrival" class="form-control" value="${group?.arrivalDate || ''}" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Base Price per Pilgrim (LKR) *</label>
+                <input type="number" id="g-price" class="form-control" value="${group?.basePrice || ''}" required min="0" step="1000" placeholder="e.g. 400000" />
+              </div>
+              <div class="form-group">
+                <label>Tour Leader / Sheikh</label>
+                <input type="text" id="g-guide" class="form-control" value="${group?.guide || ''}" placeholder="e.g. Sheikh Abdul Rahman" />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-group-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">${isEdit ? 'Save Changes' : 'Create Tour Cohort'}</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    const closeModal = () => {
+      modalOverlay.classList.remove('active');
+      setTimeout(() => modalOverlay.remove(), 200);
+    };
+
+    modalOverlay.querySelector('#btn-close-group-modal').addEventListener('click', closeModal);
+    modalOverlay.querySelector('#btn-cancel-group-modal').addEventListener('click', closeModal);
+
+    modalOverlay.querySelector('#form-group-modal').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = modalOverlay.querySelector('#g-name').value;
+      const type = modalOverlay.querySelector('#g-type').value;
+      const capacity = Number(modalOverlay.querySelector('#g-capacity').value);
+      const departureDate = modalOverlay.querySelector('#g-departure').value;
+      const arrivalDate = modalOverlay.querySelector('#g-arrival').value;
+      const basePrice = Number(modalOverlay.querySelector('#g-price').value);
+      const guide = modalOverlay.querySelector('#g-guide').value;
+
+      await saveGroup({
+        id: group?.id || undefined,
+        name,
+        type,
+        capacity,
+        departureDate,
+        arrivalDate,
+        basePrice,
+        guide,
+        itinerary: group ? group.itinerary : []
+      });
+
+      window.showNotification(`Tour cohort ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+      closeModal();
+      this.render(container);
     });
   }
 };
