@@ -579,9 +579,20 @@ export default {
         </style>
       </head>
       <body>
-        <div class="no-print" style="margin-bottom: 1.5rem; text-align: right;">
-          <button onclick="window.print()" style="background: #065f46; color: white; border: none; padding: 6px 14px; border-radius: 5px; font-weight: 600; font-size: 12px; cursor: pointer;">Print / Save as PDF</button>
+        <div class="no-print" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <button onclick="window.close()" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; padding: 7px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            &larr; Return to CRM / Close
+          </button>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span style="font-size: 12px; color: #64748b;">Tip: Press Esc or click Return to go back</span>
+            <button onclick="window.print()" style="background: #065f46; color: white; border: 1px solid #065f46; padding: 7px 18px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              Print / Save as PDF
+            </button>
+          </div>
         </div>
+        <script>window.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.close(); });</script>
         <div class="header">
           <div>
             <h1 class="title">AMJA TRAVELS</h1>
