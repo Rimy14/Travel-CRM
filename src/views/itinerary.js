@@ -1,5 +1,5 @@
 // ----------------------------------------------------
-// Amja Travels CRM - Dedicated Itinerary Planner (itinerary.js)
+// Amja Travels CRM - Itinerary Planner (itinerary.js)
 // ----------------------------------------------------
 
 import { 
@@ -419,252 +419,74 @@ export default {
     }
 
     const selectedGroup = groupList.find(g => g.id === selectedGroupId) || groupList[0] || null;
-    const itinerary = selectedGroup?.itinerary || [];
-    const members = selectedGroup ? customerList.filter(c => c.groupId === selectedGroup.id && c.status !== 'cancelled') : [];
 
     container.innerHTML = `
-      <!-- TOP ACTION BAR & COHORT SELECTOR -->
-      <div class="filter-card" style="margin-bottom: 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          
-          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="font-weight: 600; font-size: 0.875rem; color: var(--text-main);">Select Tour Cohort:</span>
-              <select id="itinerary-cohort-select" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600; font-size: 0.875rem; background: #ffffff; color: #065f46;">
-                ${groupList.length === 0 ? '<option value="">No Tour Cohorts Available</option>' : groupList.map(g => `
-                  <option value="${g.id}" ${selectedGroup && selectedGroup.id === g.id ? 'selected' : ''}>
-                    ${g.name} (${(g.type || 'hajj').toUpperCase()})
-                  </option>
-                `).join('')}
-              </select>
+      <div class="itinerary-container">
+        <!-- Left Side: Group List Selector -->
+        <div class="itinerary-groups-list">
+          <h3 style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.85rem; letter-spacing: 0.05em;">
+            Select Tour Cohort
+          </h3>
+          ${groupList.length === 0 ? `
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 2rem 0;">
+              No groups available. Please create a group first.
             </div>
-
-            ${selectedGroup ? `
-              <div style="display: flex; gap: 0.5rem; font-size: 0.78rem; color: var(--text-muted);">
-                <span>📅 <strong>Departure:</strong> ${selectedGroup.departureDate || 'TBD'}</span>
-                <span>🧕 <strong>Tour Leader:</strong> ${selectedGroup.guide || 'Assigned Sheikh'}</span>
-                <span>👥 <strong>Pilgrims:</strong> ${members.length} Pax</span>
+          ` : groupList.map(g => {
+            const isSelected = selectedGroup && g.id === selectedGroup.id;
+            const count = customerList.filter(c => c.groupId === g.id && c.status !== 'cancelled').length;
+            const typeBadge = g.type === 'umrah' ? 'badge-umrah' : 'badge-hajj';
+            return `
+              <div class="group-selector-item ${isSelected ? 'selected' : ''}" data-id="${g.id}">
+                <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                  <h4 style="font-size: 0.88rem; font-weight: 700; margin: 0; color: ${isSelected ? 'var(--primary)' : 'var(--text-main)'};">${g.name}</h4>
+                  <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 2px;">
+                    <span class="badge ${typeBadge}" style="font-size: 0.62rem; padding: 1px 5px; text-transform: uppercase;">${g.type || 'Hajj'}</span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">${g.departureDate || 'Date TBD'}</span>
+                  </div>
+                </div>
+                <span class="badge" style="background-color: ${isSelected ? 'var(--primary)' : '#f1f5f9'}; color: ${isSelected ? 'white' : 'var(--text-main)'}; font-size: 0.7rem; font-weight: 600;">
+                  ${count} Pax
+                </span>
               </div>
-            ` : ''}
-          </div>
-
-          <!-- Action Buttons -->
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button class="btn btn-secondary" id="btn-print-leaflet" ${!selectedGroup ? 'disabled' : ''} style="display: inline-flex; align-items: center; gap: 6px;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-              Print Tour Timetable Leaflet
-            </button>
-            <button class="btn btn-secondary" id="btn-open-templates" ${!selectedGroup ? 'disabled' : ''} style="display: inline-flex; align-items: center; gap: 6px;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              1-Click Itinerary Templates
-            </button>
-            <button class="btn btn-primary" id="btn-add-itinerary-day" ${!selectedGroup ? 'disabled' : ''} style="display: inline-flex; align-items: center; gap: 6px;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              + Add Custom Day
-            </button>
-          </div>
-
+            `;
+          }).join('')}
         </div>
-      </div>
 
-      <!-- MAIN ITINERARY TIMELINE VIEW -->
-      ${!selectedGroup ? `
-        <div class="card" style="text-align: center; padding: 4rem; color: var(--text-muted);">
-          <h3>No Tour Cohorts Established Yet</h3>
-          <p>Please establish a tour cohort in the "Tour Groups" section before building daily itineraries.</p>
-        </div>
-      ` : `
-        <div class="card" style="margin-bottom: 0;">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.15rem;">
-                ${selectedGroup.name} &mdash; Day-by-Day Chronological Schedule
-              </h2>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">
-                ${itinerary.length} Days configured &bull; Includes prayer times, guided Ziyarat tours, and logistics
-              </span>
+        <!-- Right Side: Itinerary Planner -->
+        <div class="itinerary-planner-content">
+          ${!selectedGroup ? `
+            <div style="text-align: center; color: var(--text-muted); padding: 5rem 0;">
+              Please select or create a group to begin managing day-wise plans.
             </div>
-            <span class="badge ${selectedGroup.type === 'umrah' ? 'badge-umrah' : 'badge-hajj'}" style="font-size: 0.75rem;">
-              ${(selectedGroup.type || 'hajj').toUpperCase()} TOUR
-            </span>
-          </div>
-
-          <!-- Timeline Days Grid -->
-          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
-            ${itinerary.length === 0 ? `
-              <div style="text-align: center; padding: 3rem 1.5rem; background: #f8fafc; border: 1px dashed var(--border-color); border-radius: 8px;">
-                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
-                  No itinerary days configured yet for <strong>${selectedGroup.name}</strong>.
+          ` : `
+            <div class="itinerary-header">
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary); margin: 0;">${selectedGroup.name} Itinerary</h2>
+                  <span class="badge ${selectedGroup.type === 'umrah' ? 'badge-umrah' : 'badge-hajj'}" style="font-size: 0.7rem; text-transform: uppercase;">
+                    ${selectedGroup.type || 'hajj'} Package
+                  </span>
+                </div>
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem;">
+                  Departure: <strong>${selectedGroup.departureDate || 'N/A'}</strong> &bull; Arrival: <strong>${selectedGroup.arrivalDate || 'N/A'}</strong> &bull; Leader: <strong>${selectedGroup.guide || 'Sheikh'}</strong>
                 </p>
-                <div style="display: flex; justify-content: center; gap: 0.75rem;">
-                  <button class="btn btn-primary" id="btn-empty-load-template" style="display: inline-flex; align-items: center; gap: 6px;">
-                    Apply 1-Click Predefined Template
-                  </button>
-                  <button class="btn btn-secondary" id="btn-empty-add-day">
-                    + Add Custom Day 1
-                  </button>
-                </div>
               </div>
-            ` : itinerary.map((d, index) => {
-              const locationColors = {
-                mecca: '#065f46',
-                medina: '#0284c7',
-                mina: '#d97706',
-                arafat: '#b45309',
-                travel: '#475569'
-              };
-              const locColor = locationColors[d.location] || '#065f46';
-              const timetable = d.timetable || [];
-
-              return `
-                <div style="background: #f8fafc; border: 1px solid var(--border-color); border-left: 4px solid ${locColor}; border-radius: 6px; padding: 1rem;">
-                  
-                  <!-- Day Header -->
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem;">
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Day ${d.dayNum || (index + 1)}</span>
-                        ${d.date ? `<span style="font-size: 0.78rem; color: var(--text-muted); font-family: monospace;">(${d.date})</span>` : ''}
-                        <span class="badge" style="background: #ffffff; border: 1px solid #cbd5e1; font-size: 0.68rem; text-transform: uppercase; color: ${locColor}; font-weight: 700;">
-                          ${d.location || 'Makkah'}
-                        </span>
-                      </div>
-                      <p style="font-size: 0.8125rem; color: var(--text-main); margin: 0.35rem 0 0 0; font-weight: 500;">
-                        ${d.activity}
-                      </p>
-                    </div>
-
-                    <div style="display: flex; gap: 0.35rem;">
-                      <button class="btn btn-secondary btn-auto-schedule" data-day-index="${index}" style="padding: 3px 8px; font-size: 0.7rem;" title="Auto-fill prayer & activity slots">
-                        Auto-Timetable
-                      </button>
-                      <button class="btn btn-secondary btn-edit-day" data-day-index="${index}" style="padding: 3px 8px; font-size: 0.7rem;">
-                        Edit
-                      </button>
-                      <button class="btn btn-secondary btn-delete-day" data-day-index="${index}" style="padding: 3px 8px; font-size: 0.7rem; color: #dc2626;">
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-
-                  ${d.note ? `
-                    <div style="font-size: 0.75rem; color: #64748b; background: #ffffff; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 0.6rem; font-style: italic;">
-                      💡 Note: ${d.note}
-                    </div>
-                  ` : ''}
-
-                  <!-- Hourly Timetable Grid -->
-                  ${timetable.length > 0 ? `
-                    <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; margin-top: 0.5rem;">
-                      <div style="font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.35rem; letter-spacing: 0.03em;">
-                        Hourly Prayer & Activity Schedule:
-                      </div>
-                      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.35rem; font-size: 0.75rem;">
-                        ${timetable.map(slot => `
-                          <div style="display: flex; gap: 6px; align-items: center; background: #f8fafc; padding: 3px 6px; border-radius: 4px; border: 1px solid #f1f5f9;">
-                            <span style="font-family: monospace; font-weight: 700; color: #065f46; font-size: 0.72rem; min-width: 60px;">${slot.time}</span>
-                            <span style="color: var(--text-main); font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${slot.activity}</span>
-                          </div>
-                        `).join('')}
-                      </div>
-                    </div>
-                  ` : `
-                    <div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic; margin-top: 0.25rem;">
-                      No hourly timetable added yet. Click "Auto-Timetable" to generate standard prayer and tour times.
-                    </div>
-                  `}
-
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `}
-
-      <!-- MODAL: 1-CLICK PREDEFINED TEMPLATES -->
-      <div class="modal" id="modal-templates" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
-          <div class="modal-header">
-            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Apply Predefined Itinerary Template</h3>
-            <button class="modal-close" id="btn-close-templates-modal">&times;</button>
-          </div>
-          
-          <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
-            Select an expert-crafted pilgrimage itinerary template to automatically populate this tour cohort with complete daily activities and prayer timetables.
-          </p>
-
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            ${Object.values(PREDEFINED_TEMPLATES).map(tmpl => `
-              <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                    <strong style="font-size: 0.95rem; color: #065f46;">${tmpl.name}</strong>
-                    <span class="badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.7rem;">${tmpl.badge}</span>
-                  </div>
-                  <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem;">
-                    ${tmpl.description}
-                  </p>
-                </div>
-                <button class="btn btn-primary btn-apply-template" data-template-id="${tmpl.id}" style="align-self: flex-start; padding: 4px 12px; font-size: 0.75rem;">
-                  Apply Template to Cohort
+              <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="btn-load-template" style="font-size: 0.78rem; padding: 0.4rem 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  Predefined Templates
+                </button>
+                <button class="btn btn-primary" id="btn-print-itinerary" style="font-size: 0.78rem; padding: 0.4rem 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  Print Timetable Leaflet
                 </button>
               </div>
-            `).join('')}
-          </div>
-
-          <div class="modal-actions" style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
-            <button type="button" class="btn btn-secondary" id="btn-cancel-templates">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- MODAL: ADD / EDIT ITINERARY DAY -->
-      <div class="modal" id="modal-day" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-          <div class="modal-header">
-            <h3 id="modal-day-title" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Add Itinerary Day</h3>
-            <button class="modal-close" id="btn-close-day-modal">&times;</button>
-          </div>
-          <form id="form-day">
-            <input type="hidden" id="day-edit-index" value="" />
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Day Number *</label>
-                <input type="number" id="day-number" required min="1" />
-              </div>
-              <div class="form-group">
-                <label>Date (Optional)</label>
-                <input type="date" id="day-date" />
-              </div>
             </div>
 
-            <div class="form-group">
-              <label>Location / Stage *</label>
-              <select id="day-location">
-                <option value="mecca">Makkah Al-Mukarramah</option>
-                <option value="medina">Madinah Al-Munawwarah</option>
-                <option value="mina">Mina Tents</option>
-                <option value="arafat">Mount Arafat</option>
-                <option value="travel">Transit / Flight / Train</option>
-              </select>
+            <div class="timeline">
+              ${this.generateItineraryDaysList(selectedGroup)}
             </div>
-
-            <div class="form-group">
-              <label>Day Activity / Description *</label>
-              <textarea id="day-activity" rows="3" required placeholder="e.g. Guided Tawaf and Sa'ee rituals for complete Umrah..."></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Special Instructions / Tips</label>
-              <input type="text" id="day-note" placeholder="e.g. Wear comfortable walking sandals, bring Zamzam bottle" />
-            </div>
-
-            <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
-              <button type="button" class="btn btn-secondary" id="btn-cancel-day">Cancel</button>
-              <button type="submit" class="btn btn-primary">Save Day Schedule</button>
-            </div>
-          </form>
+          `}
         </div>
       </div>
     `;
@@ -672,36 +494,412 @@ export default {
     this.bindEvents(container, selectedGroup);
   },
 
+  // Helper: Generates vertical timeline item days based on dates or configured itinerary
+  generateItineraryDaysList(group) {
+    const itinerary = group.itinerary || [];
+    
+    // Calculate total days from dates if present
+    let dayCount = itinerary.length;
+    let start = group.departureDate ? new Date(group.departureDate) : null;
+    let end = group.arrivalDate ? new Date(group.arrivalDate) : null;
+
+    if (start && end) {
+      const calcDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      if (!isNaN(calcDays) && calcDays > 0 && calcDays <= 60) {
+        dayCount = Math.max(dayCount, calcDays);
+      }
+    }
+
+    if (dayCount === 0) {
+      return `
+        <div style="padding: 3rem 1rem; text-align: center; background: #f8fafc; border: 1px dashed var(--border-color); border-radius: 8px;">
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
+            No itinerary schedule generated yet for <strong>${group.name}</strong>.
+          </p>
+          <button class="btn btn-primary" id="btn-empty-apply-template" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            Apply 1-Click Predefined Template
+          </button>
+        </div>
+      `;
+    }
+
+    const timelineHtml = [];
+
+    for (let i = 0; i < dayCount; i++) {
+      let dateString = '';
+      if (start) {
+        const currentDayDate = new Date(start);
+        currentDayDate.setDate(start.getDate() + i);
+        dateString = currentDayDate.toISOString().substring(0, 10);
+      }
+
+      // Find saved day config, or fallback to default
+      let dayData = itinerary.find(d => d.dayNum === i + 1 || (dateString && d.date === dateString));
+      if (!dayData) {
+        dayData = {
+          dayNum: i + 1,
+          date: dateString,
+          location: 'travel',
+          activity: 'Travel details not defined. Click Edit Plan to customize this day.',
+          note: '',
+          timetable: []
+        };
+      }
+
+      // Location Label Styling
+      let locationBadgeClass = 'badge-hajj';
+      if (dayData.location === 'mecca') locationBadgeClass = 'badge-active';
+      if (dayData.location === 'medina') locationBadgeClass = 'badge-umrah';
+      if (dayData.location === 'mina') locationBadgeClass = 'badge-completed';
+      if (dayData.location === 'arafat') locationBadgeClass = 'badge-hajj';
+
+      timelineHtml.push(`
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-card">
+            <div class="timeline-card-header">
+              <div>
+                <span class="timeline-day">Day ${dayData.dayNum}</span>
+                <span class="timeline-date">(${dayData.date || dateString || 'Date TBD'})</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span class="badge ${locationBadgeClass}" style="font-size: 0.65rem; text-transform: uppercase;">
+                  ${dayData.location}
+                </span>
+                <button class="btn btn-secondary btn-auto-schedule" data-day="${dayData.dayNum}" data-date="${dayData.date || dateString}" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;" title="Auto-fill prayer & activity slots">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                  Auto-Schedule
+                </button>
+                <button class="btn btn-secondary btn-edit-day" data-day="${dayData.dayNum}" data-date="${dayData.date || dateString}" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; border-radius: 4px;">
+                  Edit Plan
+                </button>
+              </div>
+            </div>
+            <p class="timeline-desc">${dayData.activity}</p>
+            ${dayData.timetable && dayData.timetable.length > 0 ? `
+              <div class="timetable-preview" style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--border-color); display: flex; flex-direction: column; gap: 0.3rem;">
+                <span style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.025em;">Daily Hourly Timetable:</span>
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                  ${dayData.timetable.map(slot => `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem;">
+                      <span class="badge" style="background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); font-family: monospace; font-size: 0.7rem; padding: 0.1rem 0.35rem; border-radius: 4px; font-weight: 600;">${slot.time}</span>
+                      <span style="color: var(--text-main);">${slot.activity}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+            ${dayData.note ? `
+              <div style="font-size: 0.75rem; color: var(--text-muted); padding-top: 0.35rem; border-top: 1px dashed var(--border-color); display: flex; align-items: center; gap: 0.25rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Note: ${dayData.note}</span>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `);
+    }
+
+    return timelineHtml.join('');
+  },
+
   bindEvents(container, selectedGroup) {
-    // Cohort selector
-    const cohortSelect = container.querySelector('#itinerary-cohort-select');
-    if (cohortSelect) {
-      cohortSelect.addEventListener('change', (e) => {
-        selectedGroupId = e.target.value;
+    // Group Selector item click
+    const groupItems = container.querySelectorAll('.group-selector-item');
+    groupItems.forEach(item => {
+      item.addEventListener('click', () => {
+        selectedGroupId = item.getAttribute('data-id');
         this.render(container);
+      });
+    });
+
+    // Templates Modal
+    const btnLoadTmpl = container.querySelector('#btn-load-template');
+    if (btnLoadTmpl) {
+      btnLoadTmpl.addEventListener('click', () => {
+        if (selectedGroup) this.openTemplatesModal(container, selectedGroup);
       });
     }
 
-    // Templates Modal
-    const tmplModal = container.querySelector('#modal-templates');
-    const openTmpl = () => { if (tmplModal) tmplModal.style.display = 'flex'; };
-    const closeTmpl = () => { if (tmplModal) tmplModal.style.display = 'none'; };
-    
-    const btnOpenTmpl = container.querySelector('#btn-open-templates');
-    if (btnOpenTmpl) btnOpenTmpl.addEventListener('click', openTmpl);
-    const btnEmptyTmpl = container.querySelector('#btn-empty-load-template');
-    if (btnEmptyTmpl) btnEmptyTmpl.addEventListener('click', openTmpl);
-    const btnCloseTmpl = container.querySelector('#btn-close-templates-modal');
-    if (btnCloseTmpl) btnCloseTmpl.addEventListener('click', closeTmpl);
-    const btnCancelTmpl = container.querySelector('#btn-cancel-templates');
-    if (btnCancelTmpl) btnCancelTmpl.addEventListener('click', closeTmpl);
+    const btnEmptyTmpl = container.querySelector('#btn-empty-apply-template');
+    if (btnEmptyTmpl) {
+      btnEmptyTmpl.addEventListener('click', () => {
+        if (selectedGroup) this.openTemplatesModal(container, selectedGroup);
+      });
+    }
 
-    // Apply template
-    container.querySelectorAll('.btn-apply-template').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const tmplId = e.currentTarget.getAttribute('data-template-id');
+    // Print Timetable Leaflet
+    const btnPrint = container.querySelector('#btn-print-itinerary');
+    if (btnPrint) {
+      btnPrint.addEventListener('click', () => {
+        if (selectedGroup) this.openPrintItineraryModal(selectedGroup);
+      });
+    }
+
+    // Edit Day Plan Trigger
+    const editDayBtns = container.querySelectorAll('.btn-edit-day');
+    editDayBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dayNum = parseInt(btn.getAttribute('data-day'));
+        const dateStr = btn.getAttribute('data-date');
+        if (selectedGroup) this.openEditDayModal(container, selectedGroup, dayNum, dateStr);
+      });
+    });
+
+    // Auto-Schedule Day Trigger
+    const autoBtns = container.querySelectorAll('.btn-auto-schedule');
+    autoBtns.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const dayNum = parseInt(btn.getAttribute('data-day'));
+        const dateStr = btn.getAttribute('data-date');
+        if (!selectedGroup) return;
+
+        let itinerary = selectedGroup.itinerary ? [...selectedGroup.itinerary] : [];
+        let dayIndex = itinerary.findIndex(d => d.dayNum === dayNum);
+        
+        let existingDay = dayIndex !== -1 ? itinerary[dayIndex] : {
+          dayNum,
+          date: dateStr,
+          location: selectedGroup.type === 'umrah' ? (dayNum <= 7 ? 'mecca' : 'medina') : 'mecca',
+          activity: 'Guided group prayers, Tawaf, and spiritual activities.',
+          note: ''
+        };
+
+        const defaultSlots = [
+          { time: '04:30 AM', activity: `Fajr prayer at ${existingDay.location === 'medina' ? 'Masjid an-Nabawi' : 'Masjid al-Haram'}` },
+          { time: '07:30 AM', activity: 'Buffet breakfast at hotel restaurant' },
+          { time: '09:00 AM', activity: existingDay.activity.length > 50 ? existingDay.activity.substring(0, 50) + '...' : existingDay.activity },
+          { time: '01:00 PM', activity: 'Dhuhr prayer and lunch break' },
+          { time: '04:15 PM', activity: 'Asr prayer and spiritual recitation circle' },
+          { time: '06:30 PM', activity: 'Maghrib prayer and evening Dua' },
+          { time: '08:00 PM', activity: 'Isha prayer and hotel dinner buffet' }
+        ];
+
+        existingDay.timetable = defaultSlots;
+
+        if (dayIndex !== -1) {
+          itinerary[dayIndex] = existingDay;
+        } else {
+          itinerary.push(existingDay);
+        }
+
+        selectedGroup.itinerary = itinerary;
+        await saveGroup(selectedGroup);
+        window.showNotification(`Auto-generated schedule for Day ${dayNum}!`, 'success');
+        this.render(container);
+      });
+    });
+  },
+
+  // Modal: Edit Day Plan & Hourly Timetable
+  openEditDayModal(container, selectedGroup, dayNum, dateStr) {
+    const itinerary = selectedGroup.itinerary || [];
+    const dayData = itinerary.find(d => d.dayNum === dayNum) || {
+      dayNum,
+      date: dateStr || '',
+      location: 'mecca',
+      activity: '',
+      note: '',
+      timetable: []
+    };
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay active';
+    modalOverlay.innerHTML = `
+      <div class="modal-card" style="max-width: 600px;">
+        <div class="modal-header">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Day ${dayNum} Schedule</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">${selectedGroup.name} &bull; ${dateStr || 'Date TBD'}</span>
+          </div>
+          <button class="btn-close" id="btn-close-day-modal">&times;</button>
+        </div>
+        <div class="modal-body" style="padding-top: 1rem;">
+          <form id="form-edit-day">
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label>Location / Stage</label>
+                <select id="edit-day-location" class="form-control">
+                  <option value="mecca" ${dayData.location === 'mecca' ? 'selected' : ''}>Makkah Al-Mukarramah</option>
+                  <option value="medina" ${dayData.location === 'medina' ? 'selected' : ''}>Madinah Al-Munawwarah</option>
+                  <option value="mina" ${dayData.location === 'mina' ? 'selected' : ''}>Mina Tents</option>
+                  <option value="arafat" ${dayData.location === 'arafat' ? 'selected' : ''}>Mount Arafat</option>
+                  <option value="travel" ${dayData.location === 'travel' ? 'selected' : ''}>Transit / Flight / Train</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="edit-day-date" class="form-control" value="${dayData.date || dateStr || ''}" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.75rem;">
+              <label>Day Activity / Major Milestones</label>
+              <textarea id="edit-day-activity" class="form-control" rows="3" required placeholder="e.g. Guided Tawaf and Sa'ee rituals for complete Umrah...">${dayData.activity || ''}</textarea>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.75rem;">
+              <label>Special Instructions / Tips for Pilgrims</label>
+              <input type="text" id="edit-day-note" class="form-control" value="${dayData.note || ''}" placeholder="e.g. Wear comfortable walking sandals, bring Zamzam bottle" />
+            </div>
+
+            <!-- Timetable Slots Editor -->
+            <div style="margin-top: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 0.85rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label style="font-weight: 700; font-size: 0.8125rem; color: var(--text-main); margin: 0;">Hourly Prayer & Activity Timetable</label>
+                <button type="button" class="btn btn-secondary" id="btn-add-time-slot" style="font-size: 0.72rem; padding: 2px 8px;">+ Add Slot</button>
+              </div>
+              <div id="timetable-slots-container" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 180px; overflow-y: auto; padding-right: 4px;">
+                ${(dayData.timetable || []).map((slot, sIdx) => `
+                  <div class="time-slot-row" style="display: flex; gap: 0.4rem; align-items: center;">
+                    <input type="text" class="form-control slot-time" value="${slot.time}" placeholder="04:30 AM" style="width: 95px; font-family: monospace; font-size: 0.75rem;" />
+                    <input type="text" class="form-control slot-activity" value="${slot.activity}" placeholder="Fajr prayer at Haram" style="flex: 1; font-size: 0.78rem;" />
+                    <button type="button" class="btn btn-secondary btn-remove-slot" style="padding: 2px 7px; color: #dc2626; font-size: 0.72rem;">✕</button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary" id="btn-cancel-day-modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Day Schedule</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    const closeModal = () => {
+      modalOverlay.classList.remove('active');
+      setTimeout(() => modalOverlay.remove(), 200);
+    };
+
+    modalOverlay.querySelector('#btn-close-day-modal').addEventListener('click', closeModal);
+    modalOverlay.querySelector('#btn-cancel-day-modal').addEventListener('click', closeModal);
+
+    // Add slot button
+    modalOverlay.querySelector('#btn-add-time-slot').addEventListener('click', () => {
+      const container = modalOverlay.querySelector('#timetable-slots-container');
+      const row = document.createElement('div');
+      row.className = 'time-slot-row';
+      row.style.cssText = 'display: flex; gap: 0.4rem; align-items: center;';
+      row.innerHTML = `
+        <input type="text" class="form-control slot-time" value="09:00 AM" placeholder="09:00 AM" style="width: 95px; font-family: monospace; font-size: 0.75rem;" />
+        <input type="text" class="form-control slot-activity" value="" placeholder="Activity description" style="flex: 1; font-size: 0.78rem;" />
+        <button type="button" class="btn btn-secondary btn-remove-slot" style="padding: 2px 7px; color: #dc2626; font-size: 0.72rem;">✕</button>
+      `;
+      row.querySelector('.btn-remove-slot').addEventListener('click', () => row.remove());
+      container.appendChild(row);
+    });
+
+    // Remove slot buttons
+    modalOverlay.querySelectorAll('.btn-remove-slot').forEach(btn => {
+      btn.addEventListener('click', (e) => e.target.closest('.time-slot-row').remove());
+    });
+
+    // Save Form
+    modalOverlay.querySelector('#form-edit-day').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const location = modalOverlay.querySelector('#edit-day-location').value;
+      const date = modalOverlay.querySelector('#edit-day-date').value;
+      const activity = modalOverlay.querySelector('#edit-day-activity').value;
+      const note = modalOverlay.querySelector('#edit-day-note').value;
+
+      const slots = [];
+      modalOverlay.querySelectorAll('.time-slot-row').forEach(row => {
+        const time = row.querySelector('.slot-time').value.trim();
+        const act = row.querySelector('.slot-activity').value.trim();
+        if (time && act) {
+          slots.push({ time, activity: act });
+        }
+      });
+
+      let updatedItinerary = selectedGroup.itinerary ? [...selectedGroup.itinerary] : [];
+      let dayIndex = updatedItinerary.findIndex(d => d.dayNum === dayNum);
+
+      const dayObj = {
+        dayNum,
+        date,
+        location,
+        activity,
+        note,
+        timetable: slots
+      };
+
+      if (dayIndex !== -1) {
+        updatedItinerary[dayIndex] = dayObj;
+      } else {
+        updatedItinerary.push(dayObj);
+      }
+
+      // Sort by dayNum
+      updatedItinerary.sort((a, b) => a.dayNum - b.dayNum);
+
+      selectedGroup.itinerary = updatedItinerary;
+      await saveGroup(selectedGroup);
+      window.showNotification(`Day ${dayNum} schedule saved!`, 'success');
+      closeModal();
+      this.render(container);
+    });
+  },
+
+  // Modal: 1-Click Predefined Templates
+  openTemplatesModal(container, selectedGroup) {
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay active';
+    modalOverlay.innerHTML = `
+      <div class="modal-card" style="max-width: 600px;">
+        <div class="modal-header">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Predefined Itinerary Templates</h3>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Apply an expert-crafted pilgrimage itinerary to <strong>${selectedGroup.name}</strong></span>
+          </div>
+          <button class="btn-close" id="btn-close-template">&times;</button>
+        </div>
+        <div class="modal-body" style="padding-top: 1rem;">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            ${Object.values(PREDEFINED_TEMPLATES).map(tmpl => `
+              <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.15rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <strong style="font-size: 1rem; color: #065f46;">${tmpl.name}</strong>
+                  <button class="btn btn-primary btn-apply-tmpl" data-id="${tmpl.id}" style="padding: 4px 12px; font-size: 0.75rem;">Apply Template</button>
+                </div>
+                <span class="badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.68rem; margin-bottom: 0.4rem; display: inline-block;">${tmpl.badge}</span>
+                <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; margin: 0 0 0.5rem 0;">
+                  ${tmpl.description}
+                </p>
+                <div style="font-size: 0.72rem; color: #065f46; font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Includes ${tmpl.days.length} days of activities & complete hourly prayer schedules
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="modal-footer" style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-template">Close</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    const closeModal = () => {
+      modalOverlay.classList.remove('active');
+      setTimeout(() => modalOverlay.remove(), 200);
+    };
+
+    modalOverlay.querySelector('#btn-close-template').addEventListener('click', closeModal);
+    modalOverlay.querySelector('#btn-cancel-template').addEventListener('click', closeModal);
+
+    modalOverlay.querySelectorAll('.btn-apply-tmpl').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tmplId = btn.getAttribute('data-id');
         const tmpl = PREDEFINED_TEMPLATES[tmplId];
-        if (!tmpl || !selectedGroup) return;
+        if (!tmpl) return;
 
         if (confirm(`Apply "${tmpl.name}" to ${selectedGroup.name}? This will overwrite the daily schedule with the complete template.`)) {
           const start = selectedGroup.departureDate ? new Date(selectedGroup.departureDate) : new Date();
@@ -718,153 +916,15 @@ export default {
           selectedGroup.itinerary = populatedItinerary;
           await saveGroup(selectedGroup);
           window.showNotification(`"${tmpl.name}" applied successfully!`, 'success');
-          closeTmpl();
+          closeModal();
           this.render(container);
         }
       });
     });
-
-    // Day Modal Handling
-    const dayModal = container.querySelector('#modal-day');
-    const openDayModal = () => { if (dayModal) dayModal.style.display = 'flex'; };
-    const closeDayModal = () => { if (dayModal) dayModal.style.display = 'none'; };
-
-    const btnAddDay = container.querySelector('#btn-add-itinerary-day');
-    if (btnAddDay) {
-      btnAddDay.addEventListener('click', () => {
-        container.querySelector('#modal-day-title').innerText = 'Add Itinerary Day';
-        container.querySelector('#day-edit-index').value = '';
-        container.querySelector('#day-number').value = (selectedGroup?.itinerary?.length || 0) + 1;
-        container.querySelector('#day-date').value = '';
-        container.querySelector('#day-activity').value = '';
-        container.querySelector('#day-note').value = '';
-        openDayModal();
-      });
-    }
-
-    const btnEmptyDay = container.querySelector('#btn-empty-add-day');
-    if (btnEmptyDay) {
-      btnEmptyDay.addEventListener('click', () => {
-        if (btnAddDay) btnAddDay.click();
-      });
-    }
-
-    const btnCloseDay = container.querySelector('#btn-close-day-modal');
-    if (btnCloseDay) btnCloseDay.addEventListener('click', closeDayModal);
-    const btnCancelDay = container.querySelector('#btn-cancel-day');
-    if (btnCancelDay) btnCancelDay.addEventListener('click', closeDayModal);
-
-    // Edit Day
-    container.querySelectorAll('.btn-edit-day').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-day-index'));
-        const day = selectedGroup.itinerary[idx];
-        if (!day) return;
-
-        container.querySelector('#modal-day-title').innerText = `Edit Day ${day.dayNum || (idx + 1)}`;
-        container.querySelector('#day-edit-index').value = idx;
-        container.querySelector('#day-number').value = day.dayNum || (idx + 1);
-        container.querySelector('#day-date').value = day.date || '';
-        container.querySelector('#day-location').value = day.location || 'mecca';
-        container.querySelector('#day-activity').value = day.activity || '';
-        container.querySelector('#day-note').value = day.note || '';
-        openDayModal();
-      });
-    });
-
-    // Save Day Form
-    const formDay = container.querySelector('#form-day');
-    if (formDay) {
-      formDay.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!selectedGroup) return;
-
-        const editIndex = container.querySelector('#day-edit-index').value;
-        const dayNum = Number(container.querySelector('#day-number').value);
-        const date = container.querySelector('#day-date').value;
-        const location = container.querySelector('#day-location').value;
-        const activity = container.querySelector('#day-activity').value;
-        const note = container.querySelector('#day-note').value;
-
-        const updatedItinerary = selectedGroup.itinerary ? [...selectedGroup.itinerary] : [];
-
-        if (editIndex !== '') {
-          const idx = Number(editIndex);
-          updatedItinerary[idx] = {
-            ...updatedItinerary[idx],
-            dayNum,
-            date,
-            location,
-            activity,
-            note
-          };
-        } else {
-          updatedItinerary.push({
-            dayNum,
-            date,
-            location,
-            activity,
-            note,
-            timetable: []
-          });
-        }
-
-        selectedGroup.itinerary = updatedItinerary;
-        await saveGroup(selectedGroup);
-        window.showNotification('Itinerary day saved successfully!', 'success');
-        closeDayModal();
-        this.render(container);
-      });
-    }
-
-    // Delete Day
-    container.querySelectorAll('.btn-delete-day').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-day-index'));
-        if (confirm(`Delete Day ${idx + 1} from itinerary?`)) {
-          selectedGroup.itinerary.splice(idx, 1);
-          await saveGroup(selectedGroup);
-          window.showNotification('Day deleted.', 'info');
-          this.render(container);
-        }
-      });
-    });
-
-    // Auto-generate hourly timetable
-    container.querySelectorAll('.btn-auto-schedule').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const idx = Number(e.currentTarget.getAttribute('data-day-index'));
-        const day = selectedGroup.itinerary[idx];
-        if (!day) return;
-
-        const defaultSlots = [
-          { time: '04:30 AM', activity: `Fajr prayer at ${day.location === 'medina' ? 'Masjid an-Nabawi' : 'Masjid al-Haram'}` },
-          { time: '07:30 AM', activity: 'Buffet breakfast at hotel restaurant' },
-          { time: '09:00 AM', activity: day.activity.length > 50 ? day.activity.substring(0, 50) + '...' : day.activity },
-          { time: '01:00 PM', activity: 'Dhuhr prayer and lunch break' },
-          { time: '04:15 PM', activity: 'Asr prayer and group spiritual circle' },
-          { time: '06:30 PM', activity: 'Maghrib prayer and evening Dua' },
-          { time: '08:00 PM', activity: 'Isha prayer and hotel dinner buffet' }
-        ];
-
-        day.timetable = defaultSlots;
-        await saveGroup(selectedGroup);
-        window.showNotification(`Auto-generated prayer & activity schedule for Day ${idx + 1}!`, 'success');
-        this.render(container);
-      });
-    });
-
-    // Print Timetable Leaflet
-    const btnPrint = container.querySelector('#btn-print-leaflet');
-    if (btnPrint) {
-      btnPrint.addEventListener('click', () => {
-        if (selectedGroup) this.printLeaflet(selectedGroup);
-      });
-    }
   },
 
   // Direct In-page Print Leaflet
-  printLeaflet(selectedGroup) {
+  openPrintItineraryModal(selectedGroup) {
     const itinerary = selectedGroup.itinerary || [];
     const members = customerList.filter(c => c.groupId === selectedGroup.id && c.status !== 'cancelled');
 
@@ -875,18 +935,18 @@ export default {
         <title>${selectedGroup.name} - Tour Timetable</title>
         <style>
           @page { size: auto; margin: 12mm; }
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1f2937; line-height: 1.5; margin: 0; padding: 0; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937; line-height: 1.5; margin: 0; padding: 0; }
           .header { border-bottom: 2px solid #065f46; padding-bottom: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-end; }
-          .title { font-size: 24px; font-weight: 800; color: #065f46; margin: 0; }
-          .subtitle { font-size: 12px; color: #6b7280; margin-top: 4px; }
-          .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; background: #f9fafb; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.25rem; font-size: 12px; border: 1px solid #e5e7eb; }
+          .title { font-size: 22px; font-weight: 800; color: #065f46; margin: 0; }
+          .subtitle { font-size: 11px; color: #6b7280; margin-top: 3px; }
+          .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; background: #f9fafb; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.25rem; font-size: 11px; border: 1px solid #e5e7eb; }
           .meta-label { color: #6b7280; font-size: 10px; text-transform: uppercase; font-weight: 600; }
           .meta-val { font-weight: 700; color: #111827; margin-top: 2px; }
           .day-box { border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.85rem; margin-bottom: 0.85rem; page-break-inside: avoid; }
           .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e5e7eb; padding-bottom: 0.4rem; margin-bottom: 0.4rem; }
-          .day-title { font-size: 14px; font-weight: 700; color: #065f46; }
+          .day-title { font-size: 13px; font-weight: 700; color: #065f46; }
           .day-loc { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; background: #ecfdf5; color: #065f46; border-radius: 4px; }
-          .day-act { font-size: 12px; margin: 0 0 0.4rem 0; }
+          .day-act { font-size: 11px; margin: 0 0 0.4rem 0; }
           .tt-table { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 11px; }
           .tt-table td { padding: 4px 6px; border-bottom: 1px solid #f3f4f6; }
           .tt-time { width: 85px; font-weight: 700; color: #374151; font-family: monospace; }
@@ -900,7 +960,7 @@ export default {
             <div class="subtitle">Official Pilgrimage Tour Schedule & Day-wise Timetable</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 15px; font-weight: 700; color: #111827;">${selectedGroup.name}</div>
+            <div style="font-size: 14px; font-weight: 700; color: #111827;">${selectedGroup.name}</div>
             <div class="subtitle">Tour Leader: ${selectedGroup.guide || 'Assigned Sheikh'}</div>
           </div>
         </div>
@@ -924,10 +984,10 @@ export default {
           </div>
         </div>
 
-        <h3 style="font-size: 14px; color: #111827; margin-bottom: 0.75rem;">Chronological Tour Schedule</h3>
+        <h3 style="font-size: 13px; color: #111827; margin-bottom: 0.75rem;">Chronological Tour Schedule</h3>
 
         ${itinerary.length === 0 ? `
-          <p style="color: #6b7280; font-size: 12px;">No itinerary days have been configured for this group.</p>
+          <p style="color: #6b7280; font-size: 11px;">No itinerary days have been configured for this group.</p>
         ` : itinerary.map(d => `
           <div class="day-box">
             <div class="day-header">
@@ -935,7 +995,7 @@ export default {
               <span class="day-loc">${d.location}</span>
             </div>
             <p class="day-act">${d.activity}</p>
-            ${d.note ? `<div style="font-size: 11px; color: #6b7280; margin-bottom: 0.4rem; font-style: italic;">Note: ${d.note}</div>` : ''}
+            ${d.note ? `<div style="font-size: 10px; color: #6b7280; margin-bottom: 0.4rem; font-style: italic;">Note: ${d.note}</div>` : ''}
             ${d.timetable && d.timetable.length > 0 ? `
               <table class="tt-table">
                 <tbody>
