@@ -10,7 +10,6 @@ import dashboardView from './views/dashboard.js';
 import customersView from './views/customers.js';
 import groupsView from './views/groups.js';
 import itineraryView from './views/itinerary.js';
-import hotelsView from './views/hotels.js';
 import flightsView from './views/flights.js';
 import invoicesView from './views/invoices.js';
 import expensesView from './views/expenses.js';
@@ -23,7 +22,6 @@ const views = {
   customers: customersView,
   groups: groupsView,
   itinerary: itineraryView,
-  hotels: hotelsView,
   flights: flightsView,
   invoices: invoicesView,
   expenses: expensesView,
@@ -117,9 +115,6 @@ async function navigateTo(viewName) {
   } else if (viewName === 'itinerary') {
     titleEl.innerText = 'Daily Itinerary & Timetable Planner';
     subtitleEl.innerText = 'Build chronological daily schedules, apply 1-click templates, and generate prayer timetables.';
-  } else if (viewName === 'hotels') {
-    titleEl.innerText = 'Hotels & Room Allocation';
-    subtitleEl.innerText = 'Manage Makkah & Madinah hotel properties, room capacities, and pilgrim bed assignments.';
   } else if (viewName === 'flights') {
     titleEl.innerText = 'Flights & Ground Transport Logistics';
     subtitleEl.innerText = 'Track airline group bookings, PNRs, airport pickups, and Haramain bullet train transfers.';
