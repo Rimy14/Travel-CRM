@@ -894,7 +894,7 @@ export default {
       const container = modalOverlay.querySelector('#timetable-slots-container');
       if (!container) return;
       if (timetableSlots.length === 0) {
-        container.innerHTML = `<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 0.75rem;">No hourly slots added. Click "+ Add Slot" or "⚡ Auto-Generate Timetable".</div>`;
+        container.innerHTML = `<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 0.75rem;">No hourly slots added. Click "+ Add Slot" or "Auto-Schedule".</div>`;
         return;
       }
       container.innerHTML = timetableSlots.map((s, idx) => `
@@ -952,8 +952,9 @@ export default {
             <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin: 0;">Date-wise Hourly Timetable</label>
-                <button type="button" id="btn-auto-timetable" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.25rem 0.5rem; background: var(--secondary-light); color: var(--accent-gold); border: 1px solid rgba(212, 175, 55, 0.3);">
-                  ⚡ Auto-Generate Timetable
+                <button type="button" id="btn-auto-timetable" class="btn btn-secondary" style="font-size: 0.72rem; padding: 0.25rem 0.55rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                  Auto-Schedule Prayers & Activities
                 </button>
               </div>
               <div id="timetable-slots-container" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 180px; overflow-y: auto; padding-right: 0.25rem;">
@@ -1108,8 +1109,9 @@ export default {
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.4;">
                   ${tmpl.description}
                 </p>
-                <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-top: 0.25rem;">
-                  ✓ Pre-fills ${tmpl.days.length} days of activities & complete hourly timetables
+                <div style="font-size: 0.75rem; color: var(--primary); font-weight: 550; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Includes ${tmpl.days.length} days of activities & complete hourly prayer schedules
                 </div>
               </div>
             `).join('')}

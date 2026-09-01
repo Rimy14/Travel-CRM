@@ -95,12 +95,12 @@ export default {
                         ${(() => {
                           const sr = c.specialRequests || {};
                           const tags = [];
-                          if (sr.wheelchair) tags.push('<span class="badge-sr" title="Wheelchair Required">♿ Wheelchair</span>');
-                          if (sr.diet) tags.push('<span class="badge-sr" title="Special Diabetic/Diet">🥗 Diet</span>');
-                          if (sr.elderly) tags.push('<span class="badge-sr" title="Senior Citizen Care">🧓 Elderly</span>');
-                          if (sr.groundFloor) tags.push('<span class="badge-sr" title="Ground Floor Room">🛏️ Low Floor</span>');
-                          if (sr.cot) tags.push('<span class="badge-sr" title="Child/Infant Cot">👶 Cot</span>');
-                          if (sr.notes) tags.push(`<span class="badge-sr" title="${sr.notes}">📝 ${sr.notes.length > 18 ? sr.notes.substring(0, 16) + '...' : sr.notes}</span>`);
+                          if (sr.wheelchair) tags.push('<span class="badge-sr" title="Wheelchair Required">Wheelchair</span>');
+                          if (sr.diet) tags.push('<span class="badge-sr" title="Special Diabetic/Diet">Special Diet</span>');
+                          if (sr.elderly) tags.push('<span class="badge-sr" title="Senior Citizen Care">Senior Care</span>');
+                          if (sr.groundFloor) tags.push('<span class="badge-sr" title="Ground Floor Room">Low Floor</span>');
+                          if (sr.cot) tags.push('<span class="badge-sr" title="Child/Infant Cot">Infant Cot</span>');
+                          if (sr.notes) tags.push(`<span class="badge-sr" title="${sr.notes}">${sr.notes.length > 18 ? sr.notes.substring(0, 16) + '...' : sr.notes}</span>`);
                           return tags.length > 0 ? `<div style="display: flex; gap: 0.25rem; flex-wrap: wrap; margin-top: 0.3rem;">${tags.join('')}</div>` : '';
                         })()}
                       </div>
@@ -324,19 +324,19 @@ export default {
             </label>
             <div class="doc-form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
               <label class="doc-form-checkbox">
-                <input type="checkbox" id="sr-wheelchair" ${customer?.specialRequests?.wheelchair ? 'checked' : ''}> ♿ Wheelchair Required
+                <input type="checkbox" id="sr-wheelchair" ${customer?.specialRequests?.wheelchair ? 'checked' : ''}> Wheelchair Assistance
               </label>
               <label class="doc-form-checkbox">
-                <input type="checkbox" id="sr-diet" ${customer?.specialRequests?.diet ? 'checked' : ''}> 🥗 Diabetic / Special Diet
+                <input type="checkbox" id="sr-diet" ${customer?.specialRequests?.diet ? 'checked' : ''}> Special Diet / Diabetic
               </label>
               <label class="doc-form-checkbox">
-                <input type="checkbox" id="sr-elderly" ${customer?.specialRequests?.elderly ? 'checked' : ''}> 🧓 Senior Citizen Care
+                <input type="checkbox" id="sr-elderly" ${customer?.specialRequests?.elderly ? 'checked' : ''}> Senior Care / Reduced Mobility
               </label>
               <label class="doc-form-checkbox">
-                <input type="checkbox" id="sr-groundfloor" ${customer?.specialRequests?.groundFloor ? 'checked' : ''}> 🛏️ Low / Ground Floor Room
+                <input type="checkbox" id="sr-groundfloor" ${customer?.specialRequests?.groundFloor ? 'checked' : ''}> Ground Floor / Low Floor Room
               </label>
               <label class="doc-form-checkbox">
-                <input type="checkbox" id="sr-cot" ${customer?.specialRequests?.cot ? 'checked' : ''}> 👶 Child / Infant Cot
+                <input type="checkbox" id="sr-cot" ${customer?.specialRequests?.cot ? 'checked' : ''}> Infant / Child Cot
               </label>
             </div>
             <div class="form-group" style="margin-top: 0.75rem;">

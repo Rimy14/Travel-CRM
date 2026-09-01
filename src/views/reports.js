@@ -35,42 +35,41 @@ export default {
     const totalPaid = totalEnrolled.reduce((sum, c) => sum + (c.paid || 0), 0);
     const totalDue = totalSales - totalPaid;
     const totalExpenses = filteredExpenses.reduce((sum, e) => sum + (e.cost || 0), 0);
-    const netProfit = totalPaid - totalExpenses;
     const collectionRate = totalSales > 0 ? Math.round((totalPaid / totalSales) * 100) : 0;
 
     container.innerHTML = `
       <!-- TOP CONTROLS & DATE FILTER BAR -->
-      <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+      <div class="card" style="margin-bottom: 1.25rem; padding: 1rem 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           
           <!-- Date Range Inputs -->
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 0.35rem;">
-              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">From:</label>
-              <input type="date" id="rep-date-from" class="form-control" value="${dateFilter.from}" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <label style="font-size: 0.78rem; font-weight: 550; color: var(--text-muted);">From</label>
+              <input type="date" id="rep-date-from" class="form-control" value="${dateFilter.from}" style="padding: 0.35rem 0.6rem; font-size: 0.8rem; width: 140px;">
             </div>
-            <div style="display: flex; align-items: center; gap: 0.35rem;">
-              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">To:</label>
-              <input type="date" id="rep-date-to" class="form-control" value="${dateFilter.to}" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <label style="font-size: 0.78rem; font-weight: 550; color: var(--text-muted);">To</label>
+              <input type="date" id="rep-date-to" class="form-control" value="${dateFilter.to}" style="padding: 0.35rem 0.6rem; font-size: 0.8rem; width: 140px;">
             </div>
-            <button class="btn btn-primary" id="btn-apply-dates" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Filter</button>
+            <button class="btn btn-primary" id="btn-apply-dates" style="padding: 0.35rem 0.8rem; font-size: 0.8rem;">Apply</button>
           </div>
 
           <!-- Quick Presets -->
-          <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
-            <button class="btn ${dateFilter.preset === 'all' ? 'btn-primary' : 'btn-secondary'} btn-preset" data-preset="all" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">All Time</button>
-            <button class="btn ${dateFilter.preset === 'thisMonth' ? 'btn-primary' : 'btn-secondary'} btn-preset" data-preset="thisMonth" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">This Month</button>
-            <button class="btn ${dateFilter.preset === 'upcoming' ? 'btn-primary' : 'btn-secondary'} btn-preset" data-preset="upcoming" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">Next 30 Days</button>
-            <button class="btn ${dateFilter.preset === 'thisYear' ? 'btn-primary' : 'btn-secondary'} btn-preset" data-preset="thisYear" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">Season 2026</button>
+          <div class="segmented-control" style="background: #f1f5f9; padding: 3px; border-radius: 6px; display: inline-flex; gap: 2px;">
+            <button class="btn-seg ${dateFilter.preset === 'all' ? 'active' : ''} btn-preset" data-preset="all">All Time</button>
+            <button class="btn-seg ${dateFilter.preset === 'thisMonth' ? 'active' : ''} btn-preset" data-preset="thisMonth">This Month</button>
+            <button class="btn-seg ${dateFilter.preset === 'upcoming' ? 'active' : ''} btn-preset" data-preset="upcoming">Next 30 Days</button>
+            <button class="btn-seg ${dateFilter.preset === 'thisYear' ? 'active' : ''} btn-preset" data-preset="thisYear">Season 2026</button>
           </div>
 
           <!-- Export & Print Actions -->
           <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary" id="btn-export-csv" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <button class="btn btn-secondary" id="btn-export-csv" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem;">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               Export CSV
             </button>
-            <button class="btn btn-primary" id="btn-print-report" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <button class="btn btn-secondary" id="btn-print-report" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem;">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
               Print Report
             </button>
@@ -79,81 +78,90 @@ export default {
         </div>
       </div>
 
-      <!-- DATE-FILTERED SUMMARY METRICS CARDS -->
-      <div class="stats-grid" style="margin-bottom: 1.5rem;">
+      <!-- METRIC CARDS -->
+      <div class="stats-grid" style="margin-bottom: 1.25rem;">
+        
         <div class="stat-card">
-          <div class="stat-icon" style="background: #ecfdf5; color: var(--primary);">👥</div>
+          <div class="stat-icon" style="background: #f8fafc; color: var(--primary); border: 1px solid var(--border-color);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
           <div class="stat-info">
-            <span>Enrolled Pilgrims</span>
-            <h3>${totalEnrolled.length} Pax</h3>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
-              ${filteredCustomers.filter(c => c.packageType === 'hajj' && c.status !== 'cancelled').length} Hajj | ${filteredCustomers.filter(c => c.packageType === 'umrah' && c.status !== 'cancelled').length} Umrah
+            <span class="stat-title">Enrolled Pilgrims</span>
+            <h3 class="stat-number">${totalEnrolled.length} <small style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">Pax</small></h3>
+            <div class="stat-sub">
+              ${filteredCustomers.filter(c => c.packageType === 'hajj' && c.status !== 'cancelled').length} Hajj &bull; ${filteredCustomers.filter(c => c.packageType === 'umrah' && c.status !== 'cancelled').length} Umrah
             </div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon" style="background: #eff6ff; color: #2563eb;">💰</div>
+          <div class="stat-icon" style="background: #f8fafc; color: #2563eb; border: 1px solid var(--border-color);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          </div>
           <div class="stat-info">
-            <span>Total Invoiced Sales</span>
-            <h3>LKR ${totalSales.toLocaleString()}</h3>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
-              Billed for selected period
-            </div>
+            <span class="stat-title">Invoiced Revenue</span>
+            <h3 class="stat-number">LKR ${totalSales.toLocaleString()}</h3>
+            <div class="stat-sub">Total billed in period</div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon" style="background: #ecfdf5; color: var(--status-active);">💵</div>
+          <div class="stat-icon" style="background: #ecfdf5; color: #059669; border: 1px solid #d1fae5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
           <div class="stat-info">
-            <span>Paid (Collected)</span>
-            <h3 style="color: var(--status-active);">LKR ${totalPaid.toLocaleString()}</h3>
-            <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-top: 0.15rem;">
-              ${collectionRate}% Collection Rate
-            </div>
+            <span class="stat-title">Collected (Paid)</span>
+            <h3 class="stat-number" style="color: #059669;">LKR ${totalPaid.toLocaleString()}</h3>
+            <div class="stat-sub" style="color: #059669; font-weight: 600;">${collectionRate}% Collection Rate</div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon" style="background: #fffbeb; color: var(--accent-gold);">⏳</div>
+          <div class="stat-icon" style="background: #fffbeb; color: #d97706; border: 1px solid #fef3c7;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
           <div class="stat-info">
-            <span>Pending Due Amount</span>
-            <h3 style="color: ${totalDue > 0 ? '#b45309' : 'var(--status-active)'};">LKR ${totalDue.toLocaleString()}</h3>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
-              ${filteredCustomers.filter(c => (c.price - c.paid) > 0 && c.status !== 'cancelled').length} Pilgrims with balance
-            </div>
+            <span class="stat-title">Outstanding Due</span>
+            <h3 class="stat-number" style="color: ${totalDue > 0 ? '#b45309' : '#059669'};">LKR ${totalDue.toLocaleString()}</h3>
+            <div class="stat-sub">${filteredCustomers.filter(c => (c.price - c.paid) > 0 && c.status !== 'cancelled').length} Pilgrims with balance</div>
           </div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon" style="background: #fef2f2; color: var(--status-cancelled);">❌</div>
+          <div class="stat-icon" style="background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </div>
           <div class="stat-info">
-            <span>Canceled Bookings</span>
-            <h3 style="color: var(--status-cancelled);">${totalCancelled.length} Bookings</h3>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
-              Value: LKR ${totalCancelled.reduce((s, c) => s + c.price, 0).toLocaleString()}
-            </div>
+            <span class="stat-title">Cancelled Bookings</span>
+            <h3 class="stat-number" style="color: ${totalCancelled.length > 0 ? '#dc2626' : 'var(--text-main)'};">${totalCancelled.length}</h3>
+            <div class="stat-sub">Value: LKR ${totalCancelled.reduce((s, c) => s + c.price, 0).toLocaleString()}</div>
           </div>
         </div>
+
       </div>
 
-      <!-- REPORT SELECTION TABS -->
-      <div style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; gap: 0.75rem;">
-        <button class="btn btn-secondary ${activeReportTab === 'enrolled' ? 'btn-primary' : ''} btn-rep-tab" data-tab="enrolled" style="border-radius: 8px 8px 0 0; border-bottom: none; margin-bottom: -1px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
-          👥 Enrolled Pilgrims & Settlement
-        </button>
-        <button class="btn btn-secondary ${activeReportTab === 'groups' ? 'btn-primary' : ''} btn-rep-tab" data-tab="groups" style="border-radius: 8px 8px 0 0; border-bottom: none; margin-bottom: -1px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
-          🕋 Tour Cohorts Performance
-        </button>
-        <button class="btn btn-secondary ${activeReportTab === 'cancellations' ? 'btn-primary' : ''} btn-rep-tab" data-tab="cancellations" style="border-radius: 8px 8px 0 0; border-bottom: none; margin-bottom: -1px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
-          ❌ Cancellations & Reasons Audit
-        </button>
-        <button class="btn btn-secondary ${activeReportTab === 'financial' ? 'btn-primary' : ''} btn-rep-tab" data-tab="financial" style="border-radius: 8px 8px 0 0; border-bottom: none; margin-bottom: -1px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
-          📊 Financial Health & Aging
-        </button>
+      <!-- REPORT SELECTION TABS (SEGMENTED STYLE) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <div class="segmented-control" style="background: #f1f5f9; padding: 3px; border-radius: 6px; display: inline-flex; gap: 2px;">
+          <button class="btn-seg ${activeReportTab === 'enrolled' ? 'active' : ''} btn-rep-tab" data-tab="enrolled">
+            Enrolled Pilgrims & Settlements
+          </button>
+          <button class="btn-seg ${activeReportTab === 'groups' ? 'active' : ''} btn-rep-tab" data-tab="groups">
+            Tour Cohorts Performance
+          </button>
+          <button class="btn-seg ${activeReportTab === 'cancellations' ? 'active' : ''} btn-rep-tab" data-tab="cancellations">
+            Cancellations & Audit
+          </button>
+          <button class="btn-seg ${activeReportTab === 'financial' ? 'active' : ''} btn-rep-tab" data-tab="financial">
+            Financial Health & Aging
+          </button>
+        </div>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">
+          Showing ${activeReportTab === 'enrolled' ? filteredCustomers.length : activeReportTab === 'groups' ? filteredGroups.length : activeReportTab === 'cancellations' ? totalCancelled.length : filteredExpenses.length} records
+        </span>
       </div>
 
-      <!-- ACTIVE REPORT TABLE CONTAINER -->
+      <!-- ACTIVE REPORT TABLE -->
       <div class="card" style="padding: 0; overflow: hidden;">
         ${this.renderActiveReportTable(activeReportTab, filteredCustomers, filteredGroups, filteredExpenses, groups)}
       </div>
@@ -162,7 +170,6 @@ export default {
     this.bindEvents(container, filteredCustomers, filteredGroups, filteredExpenses, groups);
   },
 
-  // Helper: Filter records by date string
   filterByDate(records, dateField) {
     if (!dateFilter.from && !dateFilter.to) return records;
     return records.filter(r => {
@@ -175,7 +182,6 @@ export default {
     });
   },
 
-  // Apply Quick Date Presets
   applyPreset(preset, shouldRerender = true) {
     dateFilter.preset = preset;
     const now = new Date();
@@ -202,7 +208,6 @@ export default {
     }
   },
 
-  // Render Sub-report Tables
   renderActiveReportTable(tab, customers, groups, expenses, allGroups) {
     if (tab === 'enrolled') {
       return `
@@ -210,48 +215,48 @@ export default {
           <table class="table">
             <thead>
               <tr>
-                <th>Pilgrim Name</th>
+                <th>Pilgrim</th>
                 <th>Package</th>
                 <th>Tour Cohort</th>
-                <th>Departure Date</th>
-                <th>Total Price</th>
-                <th>Amount Paid</th>
-                <th>Pending Balance</th>
+                <th>Departure</th>
+                <th style="text-align: right;">Package Price</th>
+                <th style="text-align: right;">Amount Paid</th>
+                <th style="text-align: right;">Pending Due</th>
                 <th>Special Requests</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               ${customers.length === 0 ? `
-                <tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem;">No enrolled pilgrims found for the selected date range.</td></tr>
+                <tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No enrolled pilgrims found for the selected period.</td></tr>
               ` : customers.map(c => {
                 const group = allGroups.find(g => g.id === c.groupId);
                 const due = c.price - c.paid;
                 const sr = c.specialRequests || {};
                 const tags = [];
-                if (sr.wheelchair) tags.push('♿ Wheelchair');
-                if (sr.diet) tags.push('🥗 Diet');
-                if (sr.elderly) tags.push('🧓 Elderly');
-                if (sr.groundFloor) tags.push('🛏️ Low Floor');
-                if (sr.cot) tags.push('👶 Cot');
-                if (sr.notes) tags.push(`📝 ${sr.notes}`);
+                if (sr.wheelchair) tags.push('Wheelchair');
+                if (sr.diet) tags.push('Special Diet');
+                if (sr.elderly) tags.push('Senior Care');
+                if (sr.groundFloor) tags.push('Low Floor');
+                if (sr.cot) tags.push('Child Cot');
+                if (sr.notes) tags.push(sr.notes);
 
                 return `
                   <tr>
-                    <td style="font-weight: 600;">
-                      <div>${c.name}</div>
-                      <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">${c.phone}</div>
+                    <td>
+                      <div style="font-weight: 600; color: var(--text-main);">${c.name}</div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">${c.phone}</div>
                     </td>
                     <td><span class="badge badge-${c.packageType}">${c.packageType}</span></td>
-                    <td>${group ? `<span style="font-weight: 600; color: var(--primary);">${group.name}</span>` : '<span style="color: var(--text-muted);">Unassigned</span>'}</td>
-                    <td>${c.departureDate || 'TBD'}</td>
-                    <td style="font-weight: 600;">LKR ${c.price.toLocaleString()}</td>
-                    <td style="color: var(--status-active); font-weight: 600;">LKR ${c.paid.toLocaleString()}</td>
-                    <td style="color: ${due > 0 ? '#b45309' : 'var(--status-active)'}; font-weight: 700;">
-                      ${due > 0 ? `LKR ${due.toLocaleString()}` : 'Settled (LKR 0)'}
+                    <td>${group ? `<span style="font-weight: 550; color: var(--primary);">${group.name}</span>` : '<span style="color: var(--text-light); font-size: 0.8rem;">Unassigned</span>'}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${c.departureDate || 'TBD'}</td>
+                    <td style="text-align: right; font-weight: 600; font-family: monospace; font-size: 0.85rem;">LKR ${c.price.toLocaleString()}</td>
+                    <td style="text-align: right; color: #059669; font-weight: 600; font-family: monospace; font-size: 0.85rem;">LKR ${c.paid.toLocaleString()}</td>
+                    <td style="text-align: right; color: ${due > 0 ? '#b45309' : '#059669'}; font-weight: 600; font-family: monospace; font-size: 0.85rem;">
+                      ${due > 0 ? `LKR ${due.toLocaleString()}` : 'Settled'}
                     </td>
                     <td>
-                      ${tags.length > 0 ? tags.map(t => `<span class="badge-sr" style="margin-right: 0.2rem;">${t}</span>`).join('') : '<span style="color: var(--text-muted); font-size: 0.75rem;">None</span>'}
+                      ${tags.length > 0 ? tags.map(t => `<span class="badge-sr">${t}</span>`).join('') : '<span style="color: var(--text-light); font-size: 0.75rem;">None</span>'}
                     </td>
                     <td><span class="badge badge-${c.status}">${c.status}</span></td>
                   </tr>
@@ -269,33 +274,33 @@ export default {
           <table class="table">
             <thead>
               <tr>
-                <th>Cohort / Group Name</th>
+                <th>Cohort / Group</th>
                 <th>Tour Type</th>
-                <th>Tour Leader (Sheikh)</th>
-                <th>Departure Date</th>
-                <th>Arrival Date</th>
+                <th>Tour Leader</th>
+                <th>Departure</th>
+                <th>Arrival</th>
                 <th>Travelers</th>
-                <th>Package Price</th>
-                <th>Total Inflow Revenue</th>
+                <th style="text-align: right;">Base Price</th>
+                <th style="text-align: right;">Group Inflow</th>
               </tr>
             </thead>
             <tbody>
               ${groups.length === 0 ? `
-                <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">No tour cohorts found for the selected date range.</td></tr>
+                <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No tour cohorts found for the selected period.</td></tr>
               ` : groups.map(g => {
                 const members = customers.filter(c => c.groupId === g.id && c.status !== 'cancelled');
                 const groupRevenue = members.reduce((sum, c) => sum + c.price, 0);
 
                 return `
                   <tr>
-                    <td style="font-weight: 700; color: var(--text-main);">${g.name}</td>
-                    <td><span class="badge ${g.type === 'umrah' ? 'badge-umrah' : 'badge-hajj'}" style="text-transform: uppercase;">${g.type || 'hajj'}</span></td>
-                    <td style="font-weight: 600;">${g.guide || 'Not Assigned'}</td>
-                    <td>${g.departureDate || 'TBD'}</td>
-                    <td>${g.arrivalDate || 'TBD'}</td>
-                    <td style="font-weight: 600; color: var(--primary);">${members.length} Pilgrims</td>
-                    <td>LKR ${(g.basePrice || 0).toLocaleString()}</td>
-                    <td style="font-weight: 700; color: var(--status-active);">LKR ${groupRevenue.toLocaleString()}</td>
+                    <td style="font-weight: 600; color: var(--text-main);">${g.name}</td>
+                    <td><span class="badge ${g.type === 'umrah' ? 'badge-umrah' : 'badge-hajj'}">${g.type || 'hajj'}</span></td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${g.guide || 'Not Assigned'}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${g.departureDate || 'TBD'}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${g.arrivalDate || 'TBD'}</td>
+                    <td style="font-weight: 600; color: var(--primary);">${members.length} Pax</td>
+                    <td style="text-align: right; font-family: monospace; font-size: 0.85rem;">LKR ${(g.basePrice || 0).toLocaleString()}</td>
+                    <td style="text-align: right; font-weight: 700; color: #059669; font-family: monospace; font-size: 0.85rem;">LKR ${groupRevenue.toLocaleString()}</td>
                   </tr>
                 `;
               }).join('')}
@@ -312,28 +317,28 @@ export default {
           <table class="table">
             <thead>
               <tr>
-                <th>Pilgrim Name</th>
+                <th>Pilgrim</th>
                 <th>Contact</th>
                 <th>Package</th>
-                <th>Booked Departure</th>
-                <th>Package Value</th>
-                <th>Amount Deposited</th>
-                <th>Cancellation Reason & Remarks</th>
+                <th>Departure Date</th>
+                <th style="text-align: right;">Package Value</th>
+                <th style="text-align: right;">Amount Deposited</th>
+                <th>Reason & Remarks</th>
               </tr>
             </thead>
             <tbody>
               ${cancelled.length === 0 ? `
-                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No cancelled bookings recorded for this date period.</td></tr>
+                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No cancelled bookings recorded for this period.</td></tr>
               ` : cancelled.map(c => `
                 <tr>
-                  <td style="font-weight: 700; color: var(--status-cancelled);">${c.name}</td>
-                  <td>${c.phone}</td>
+                  <td style="font-weight: 600; color: var(--text-main);">${c.name}</td>
+                  <td style="color: var(--text-muted); font-size: 0.8rem;">${c.phone}</td>
                   <td><span class="badge badge-${c.packageType}">${c.packageType}</span></td>
-                  <td>${c.departureDate || 'N/A'}</td>
-                  <td style="font-weight: 600;">LKR ${c.price.toLocaleString()}</td>
-                  <td style="font-weight: 600;">LKR ${c.paid.toLocaleString()}</td>
-                  <td style="color: var(--status-cancelled); font-weight: 500; max-width: 250px;">
-                    ${c.cancellationReason || 'No specific reason recorded.'}
+                  <td style="font-size: 0.8rem; color: var(--text-muted);">${c.departureDate || 'N/A'}</td>
+                  <td style="text-align: right; font-family: monospace; font-size: 0.85rem; font-weight: 600;">LKR ${c.price.toLocaleString()}</td>
+                  <td style="text-align: right; font-family: monospace; font-size: 0.85rem; color: #059669;">LKR ${c.paid.toLocaleString()}</td>
+                  <td style="color: #dc2626; font-size: 0.8rem; max-width: 250px;">
+                    ${c.cancellationReason || 'No reason recorded.'}
                   </td>
                 </tr>
               `).join('')}
@@ -356,57 +361,54 @@ export default {
       const zeroPaid = activePax.filter(c => c.paid === 0);
 
       return `
-        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
-          
-          <!-- Breakdown Grid -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
             
-            <div class="card" style="margin-bottom: 0; border: 1px solid var(--border-color); background: var(--bg-main);">
-              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Receivables & Aging Summary</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
-                  <span>Fully Paid Bookings:</span>
-                  <span style="font-weight: 700; color: var(--status-active);">${fullyPaid.length} Pilgrims</span>
+            <div class="card" style="margin-bottom: 0; border: 1px solid var(--border-color); background: #f8fafc;">
+              <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.85rem; color: var(--text-main);">Receivables & Aging</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.8125rem;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.35rem;">
+                  <span style="color: var(--text-muted);">Fully Paid:</span>
+                  <span style="font-weight: 600; color: #059669;">${fullyPaid.length} Pilgrims</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
-                  <span>Partially Paid (Deposits):</span>
-                  <span style="font-weight: 700; color: #b45309;">${partialPaid.length} Pilgrims</span>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.35rem;">
+                  <span style="color: var(--text-muted);">Partially Paid (Deposits):</span>
+                  <span style="font-weight: 600; color: #b45309;">${partialPaid.length} Pilgrims</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
-                  <span>Zero Payment (Overdue):</span>
-                  <span style="font-weight: 700; color: var(--status-cancelled);">${zeroPaid.length} Pilgrims</span>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.35rem;">
+                  <span style="color: var(--text-muted);">Zero Payment:</span>
+                  <span style="font-weight: 600; color: #dc2626;">${zeroPaid.length} Pilgrims</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding-top: 0.25rem;">
-                  <span>Total Active Balance Due:</span>
-                  <span style="font-weight: 800; color: #b45309;">LKR ${activePax.reduce((s, c) => s + (c.price - c.paid), 0).toLocaleString()}</span>
+                <div style="display: flex; justify-content: space-between; padding-top: 0.35rem;">
+                  <span style="font-weight: 600; color: var(--text-main);">Total Active Due:</span>
+                  <span style="font-weight: 700; color: #b45309; font-family: monospace;">LKR ${activePax.reduce((s, c) => s + (c.price - c.paid), 0).toLocaleString()}</span>
                 </div>
               </div>
             </div>
 
-            <div class="card" style="margin-bottom: 0; border: 1px solid var(--border-color); background: var(--bg-main);">
-              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">Operating Cost Segregation</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
-                  <span>Pre-Departure Costs (Visas, Flights):</span>
-                  <span style="font-weight: 700; color: var(--text-main);">LKR ${totalPre.toLocaleString()}</span>
+            <div class="card" style="margin-bottom: 0; border: 1px solid var(--border-color); background: #f8fafc;">
+              <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.85rem; color: var(--text-main);">Operating Cost Segregation</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.8125rem;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.35rem;">
+                  <span style="color: var(--text-muted);">Pre-Departure Costs:</span>
+                  <span style="font-weight: 600; font-family: monospace;">LKR ${totalPre.toLocaleString()}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
-                  <span>On-Tour Costs (Hotels, Meals, Buses):</span>
-                  <span style="font-weight: 700; color: var(--text-main);">LKR ${totalOnTour.toLocaleString()}</span>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.35rem;">
+                  <span style="color: var(--text-muted);">On-Tour Expenses:</span>
+                  <span style="font-weight: 600; font-family: monospace;">LKR ${totalOnTour.toLocaleString()}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
-                  <span>Total Recorded Outflow:</span>
-                  <span style="font-weight: 700; color: var(--status-cancelled);">LKR ${totalCost.toLocaleString()}</span>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.35rem;">
+                  <span style="color: var(--text-muted);">Total Recorded Outflow:</span>
+                  <span style="font-weight: 600; color: #dc2626; font-family: monospace;">LKR ${totalCost.toLocaleString()}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding-top: 0.25rem;">
-                  <span>Estimated Net Margin:</span>
-                  <span style="font-weight: 800; color: var(--status-active);">LKR ${(activePax.reduce((s, c) => s + c.paid, 0) - totalCost).toLocaleString()}</span>
+                <div style="display: flex; justify-content: space-between; padding-top: 0.35rem;">
+                  <span style="font-weight: 600; color: var(--text-main);">Net Margin (Cash Inflow - Costs):</span>
+                  <span style="font-weight: 700; color: #059669; font-family: monospace;">LKR ${(activePax.reduce((s, c) => s + c.paid, 0) - totalCost).toLocaleString()}</span>
                 </div>
               </div>
             </div>
 
           </div>
-
         </div>
       `;
     }
@@ -415,7 +417,6 @@ export default {
   },
 
   bindEvents(container, customers, groups, expenses, allGroups) {
-    // Tab switching
     container.querySelectorAll('.btn-rep-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         activeReportTab = btn.getAttribute('data-tab');
@@ -423,7 +424,6 @@ export default {
       });
     });
 
-    // Preset filter buttons
     container.querySelectorAll('.btn-preset').forEach(btn => {
       btn.addEventListener('click', () => {
         const preset = btn.getAttribute('data-preset');
@@ -432,7 +432,6 @@ export default {
       });
     });
 
-    // Manual date filter apply
     const applyBtn = container.querySelector('#btn-apply-dates');
     if (applyBtn) {
       applyBtn.addEventListener('click', () => {
@@ -443,7 +442,6 @@ export default {
       });
     }
 
-    // Export CSV Trigger
     const exportBtn = container.querySelector('#btn-export-csv');
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {
@@ -451,7 +449,6 @@ export default {
       });
     }
 
-    // Print Report Trigger
     const printBtn = container.querySelector('#btn-print-report');
     if (printBtn) {
       printBtn.addEventListener('click', () => {
@@ -460,7 +457,6 @@ export default {
     }
   },
 
-  // Export to CSV Function
   exportToCSV(tab, customers, groups, expenses, allGroups) {
     let headers = [];
     let rows = [];
@@ -544,7 +540,6 @@ export default {
     window.showNotification(`Report exported as ${filename}!`, 'success');
   },
 
-  // Print Report Function
   printReport(tab, customers, groups, expenses, allGroups) {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -554,9 +549,9 @@ export default {
 
     const tableHtml = this.renderActiveReportTable(tab, customers, groups, expenses, allGroups);
     const tabNames = {
-      enrolled: 'Enrolled Pilgrims & Financial Settlement Report',
-      groups: 'Tour Cohorts & Performance Report',
-      cancellations: 'Cancelled Bookings & Refund Audit Report',
+      enrolled: 'Enrolled Pilgrims & Settlement Report',
+      groups: 'Tour Cohorts Performance Report',
+      cancellations: 'Cancelled Bookings & Audit Report',
       financial: 'Financial Health & Collections Summary'
     };
 
@@ -566,17 +561,17 @@ export default {
       <head>
         <title>Amja Travels - ${tabNames[tab]}</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 2rem; color: #111827; line-height: 1.5; }
-          .header { border-bottom: 2px solid #0b5e34; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
-          .title { font-size: 24px; font-weight: 800; color: #0b5e34; margin: 0; }
-          .sub { font-size: 13px; color: #6b7280; margin-top: 4px; }
-          .meta { font-size: 12px; color: #4b5563; margin-bottom: 1.5rem; background: #f9fafb; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #e5e7eb; }
-          table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 1rem; }
-          th { background: #f3f4f6; text-align: left; padding: 8px; border-bottom: 1px solid #d1d5db; font-weight: 700; color: #374151; }
-          td { padding: 8px; border-bottom: 1px solid #e5e7eb; }
-          .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
-          .badge-sr { font-size: 10px; padding: 2px 5px; background: #fef3c7; color: #92400e; border-radius: 3px; display: inline-block; margin: 1px; }
-          .footer { margin-top: 2.5rem; border-top: 1px solid #e5e7eb; padding-top: 0.75rem; font-size: 11px; color: #9ca3af; text-align: center; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 2rem; color: #0f172a; line-height: 1.5; }
+          .header { border-bottom: 2px solid #065f46; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+          .title { font-size: 22px; font-weight: 800; color: #065f46; margin: 0; letter-spacing: -0.02em; }
+          .sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+          .meta { font-size: 11px; color: #475569; margin-bottom: 1.25rem; background: #f8fafc; padding: 0.6rem 0.85rem; border-radius: 6px; border: 1px solid #e2e8f0; }
+          table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 0.75rem; }
+          th { background: #f8fafc; text-align: left; padding: 6px 8px; border-bottom: 1px solid #cbd5e1; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em; }
+          td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; }
+          .badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; }
+          .badge-sr { font-size: 9px; padding: 1px 4px; background: #fef3c7; color: #92400e; border-radius: 3px; display: inline-block; margin: 1px; }
+          .footer { margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem; font-size: 10px; color: #94a3b8; text-align: center; }
           @media print {
             .no-print { display: none; }
             body { padding: 0.5cm; }
@@ -585,28 +580,28 @@ export default {
       </head>
       <body>
         <div class="no-print" style="margin-bottom: 1.5rem; text-align: right;">
-          <button onclick="window.print()" style="background: #0b5e34; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;">Print / Save as PDF</button>
+          <button onclick="window.print()" style="background: #065f46; color: white; border: none; padding: 6px 14px; border-radius: 5px; font-weight: 600; font-size: 12px; cursor: pointer;">Print / Save as PDF</button>
         </div>
         <div class="header">
           <div>
             <h1 class="title">AMJA TRAVELS</h1>
-            <div class="sub">Hajj & Umrah Travel Management System • Management Report</div>
+            <div class="sub">Hajj & Umrah CRM &bull; Management Reporting</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 14px; font-weight: 700;">${tabNames[tab]}</div>
-            <div class="sub">Generated: ${new Date().toLocaleString()}</div>
+            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${tabNames[tab]}</div>
+            <div class="sub">Generated: ${new Date().toLocaleDateString()}</div>
           </div>
         </div>
 
         <div class="meta">
-          <strong>Filtered Period:</strong> ${dateFilter.from || 'Beginning of time'} &nbsp;to&nbsp; ${dateFilter.to || 'Present'} &nbsp; | &nbsp; 
-          <strong>Total Records:</strong> ${tab === 'enrolled' ? customers.length : tab === 'groups' ? groups.length : tab === 'cancellations' ? customers.filter(c => c.status === 'cancelled').length : expenses.length}
+          <strong>Period:</strong> ${dateFilter.from || 'All'} &mdash; ${dateFilter.to || 'Present'} &nbsp;&bull;&nbsp; 
+          <strong>Records:</strong> ${tab === 'enrolled' ? customers.length : tab === 'groups' ? groups.length : tab === 'cancellations' ? customers.filter(c => c.status === 'cancelled').length : expenses.length}
         </div>
 
         ${tableHtml}
 
         <div class="footer">
-          Amja Travels (Pvt) Ltd • Confidential Financial & Operations Report
+          Amja Travels (Pvt) Ltd &bull; Confidential Internal Report
         </div>
       </body>
       </html>
