@@ -1,11 +1,9 @@
 // ----------------------------------------------------
-// Amja Travels CRM - Invoices & Payment Receipts (invoices.js)
+// Amja Travels CRM - Invoices & Official Receipts (invoices.js)
 // ----------------------------------------------------
 
 import { 
   getCustomers, 
-  getPayments, 
-  recordPayment,
   getGroups 
 } from '../db.js';
 
@@ -15,7 +13,6 @@ let invoiceSearchQuery = '';
 export default {
   async render(container) {
     const customers = await getCustomers();
-    const payments = await getPayments();
     const groups = await getGroups();
 
     const activePilgrims = customers.filter(c => c.status !== 'cancelled');
@@ -73,7 +70,7 @@ export default {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
           <div class="stat-info">
-            <span class="stat-title">Outstanding Receivables</span>
+            <span class="stat-title">Outstanding Balance</span>
             <h3 class="stat-number" style="color: ${totalOutstanding > 0 ? '#b45309' : '#059669'};">LKR ${totalOutstanding.toLocaleString()}</h3>
             <div class="stat-sub">${pendingDueCount} Pilgrims with Pending Balance</div>
           </div>
@@ -84,9 +81,9 @@ export default {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
           </div>
           <div class="stat-info">
-            <span class="stat-title">Receipts Issued</span>
-            <h3 class="stat-number">${payments.length} Vouchers</h3>
-            <div class="stat-sub">${fullySettledCount} Fully Cleared Accounts</div>
+            <span class="stat-title">Settlement Ratio</span>
+            <h3 class="stat-number">${fullySettledCount} Settled</h3>
+            <div class="stat-sub">${Math.round((fullySettledCount / (activePilgrims.length || 1)) * 100)}% Accounts Cleared</div>
           </div>
         </div>
 
@@ -106,25 +103,23 @@ export default {
 
             <!-- Search input -->
             <div style="position: relative;">
-              <input type="text" id="input-search-invoices" class="form-control" placeholder="Search pilgrim or phone..." value="${invoiceSearchQuery}" style="width: 220px; font-size: 0.8125rem;" />
+              <input type="text" id="input-search-invoices" class="form-control" placeholder="Search pilgrim or phone..." value="${invoiceSearchQuery}" style="width: 240px; font-size: 0.8125rem;" />
             </div>
           </div>
 
-          <!-- Quick Action -->
-          <button class="btn btn-primary" id="btn-quick-payment" style="display: inline-flex; align-items: center; gap: 6px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Record Installment Payment
-          </button>
+          <div style="font-size: 0.8125rem; color: var(--text-muted);">
+            Showing <strong>${filteredPilgrims.length}</strong> of ${activePilgrims.length} pilgrim invoices
+          </div>
 
         </div>
       </div>
 
       <!-- PILGRIM INVOICES TABLE -->
-      <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card" style="margin-bottom: 0;">
         <div class="card-header">
           <div>
-            <h2 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.15rem;">Pilgrim Invoices & Settlement Ledger</h2>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">Package cost breakdown, amount received, balance due, and official receipt generation</span>
+            <h2 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.15rem;">Pilgrim Invoices & Payment Receipts</h2>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">View billing summaries, payment progress, and print official branded payment receipts</span>
           </div>
         </div>
 
@@ -138,13 +133,13 @@ export default {
                 <th style="text-align: right;">Total Price</th>
                 <th style="text-align: right;">Amount Paid</th>
                 <th style="text-align: right;">Balance Due</th>
-                <th>Settlement Progress</th>
+                <th>Payment Progress</th>
                 <th style="text-align: right;">Actions</th>
               </tr>
             </thead>
             <tbody>
               ${filteredPilgrims.length === 0 ? `
-                <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No invoices match this filter criteria.</td></tr>
+                <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem;">No invoices match this filter criteria.</td></tr>
               ` : filteredPilgrims.map((p, idx) => {
                 const due = (p.price || 0) - (p.paid || 0);
                 const isFullyPaid = due <= 0;
@@ -180,15 +175,10 @@ export default {
                       </div>
                     </td>
                     <td style="text-align: right;">
-                      <div style="display: inline-flex; gap: 0.35rem;">
-                        <button class="btn btn-secondary btn-print-receipt" data-cust-id="${p.id}" data-inv-num="${invoiceNum}" style="padding: 3px 8px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;" title="Print Official Receipt">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                          Receipt
-                        </button>
-                        <button class="btn btn-primary btn-record-single-pay" data-cust-id="${p.id}" data-cust-name="${p.name}" data-due="${due}" style="padding: 3px 8px; font-size: 0.72rem;">
-                          + Pay
-                        </button>
-                      </div>
+                      <button class="btn btn-secondary btn-print-receipt" data-cust-id="${p.id}" data-inv-num="${invoiceNum}" style="padding: 4px 10px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 5px; color: #065f46; font-weight: 600;" title="Print Official Receipt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        Print Receipt
+                      </button>
                     </td>
                   </tr>
                 `;
@@ -197,55 +187,12 @@ export default {
           </table>
         </div>
       </div>
-
-      <!-- PAYMENT TRANSACTION VOUCHERS -->
-      <div class="card" style="margin-bottom: 0;">
-        <div class="card-header">
-          <div>
-            <h2 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.15rem;">Recent Payment Transactions & Vouchers</h2>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">Recorded receipts, payment modes (Cash / Bank Transfer / Card), and bank references</span>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          <table class="table" style="font-size: 0.8125rem;">
-            <thead>
-              <tr>
-                <th>Receipt Voucher</th>
-                <th>Payment Date</th>
-                <th>Pilgrim Name</th>
-                <th>Payment Method</th>
-                <th>Bank Reference / Slip</th>
-                <th style="text-align: right;">Amount Paid</th>
-                <th style="text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${payments.length === 0 ? `
-                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No separate payment transactions logged yet. Click "+ Record Installment Payment" to issue a receipt voucher.</td></tr>
-              ` : payments.slice().reverse().map(pay => `
-                <tr>
-                  <td><strong style="font-family: monospace; color: #065f46;">${pay.receiptNo}</strong></td>
-                  <td>${pay.paymentDate || 'N/A'}</td>
-                  <td><strong>${pay.customerName}</strong></td>
-                  <td><span class="badge" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 0.7rem;">${pay.paymentMethod}</span></td>
-                  <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted);">${pay.reference || 'N/A'}</td>
-                  <td style="text-align: right; font-family: monospace; font-weight: 700; color: #059669;">LKR ${(pay.amount || 0).toLocaleString()}</td>
-                  <td style="text-align: right;">
-                    <button class="btn btn-secondary btn-print-single-voucher" data-pay-id="${pay.id}" style="padding: 2px 7px; font-size: 0.7rem;">Print Slip</button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
     `;
 
-    this.bindEvents(container, customers, payments, groups);
+    this.bindEvents(container, customers, groups);
   },
 
-  bindEvents(container, customers, payments, groups) {
+  bindEvents(container, customers, groups) {
     // Status filter buttons
     container.querySelectorAll('[data-inv-filter]').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -263,23 +210,6 @@ export default {
       });
     }
 
-    // Quick Action button
-    const btnQuickPay = container.querySelector('#btn-quick-payment');
-    if (btnQuickPay) {
-      btnQuickPay.addEventListener('click', () => {
-        this.openPaymentModal(container, customers, null, null);
-      });
-    }
-
-    // Single Pilgrim "+ Pay" Button
-    container.querySelectorAll('.btn-record-single-pay').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const custId = e.currentTarget.getAttribute('data-cust-id');
-        const due = e.currentTarget.getAttribute('data-due');
-        this.openPaymentModal(container, customers, custId, due);
-      });
-    });
-
     // Print Official Receipt
     container.querySelectorAll('.btn-print-receipt').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -287,139 +217,14 @@ export default {
         const invNum = e.currentTarget.getAttribute('data-inv-num');
         const pilgrim = customers.find(c => c.id === custId);
         if (pilgrim) {
-          this.printOfficialReceipt(pilgrim, invNum, payments, groups);
+          this.printOfficialReceipt(pilgrim, invNum, groups);
         }
       });
-    });
-
-    // Print Single Voucher
-    container.querySelectorAll('.btn-print-single-voucher').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const payId = e.currentTarget.getAttribute('data-pay-id');
-        const pay = payments.find(p => p.id === payId);
-        const pilgrim = customers.find(c => c.id === pay.customerId) || { name: pay.customerName, phone: 'N/A', packageType: 'Hajj/Umrah', price: pay.amount, paid: pay.amount };
-        this.printOfficialReceipt(pilgrim, pay.receiptNo, [pay], groups);
-      });
-    });
-  },
-
-  // Modal: Record Payment (Appended to document.body)
-  openPaymentModal(container, customers, targetCustId = null, targetDue = null) {
-    const activePilgrims = customers.filter(c => c.status !== 'cancelled');
-
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'modal-overlay active';
-    modalOverlay.id = 'payment-modal-overlay';
-
-    modalOverlay.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Record Pilgrim Payment</h3>
-          <button class="modal-close" id="btn-close-pay-modal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        <form id="form-payment-modal">
-          <div class="modal-body">
-            <div class="form-group">
-              <label>Select Pilgrim Traveler *</label>
-              <select id="modal-pay-pilgrim-select" class="form-control" required>
-                <option value="">-- Choose pilgrim --</option>
-                ${activePilgrims.map(p => {
-                  const due = (p.price || 0) - (p.paid || 0);
-                  const isSelected = targetCustId && p.id === targetCustId;
-                  return `<option value="${p.id}" data-name="${p.name}" data-due="${due}" ${isSelected ? 'selected' : ''}>
-                    ${p.name} (Due: LKR ${due.toLocaleString()})
-                  </option>`;
-                }).join('')}
-              </select>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Payment Amount (LKR) *</label>
-                <input type="number" id="modal-pay-amount" class="form-control" required min="1000" step="500" value="${targetDue && Number(targetDue) > 0 ? targetDue : ''}" placeholder="e.g. 200000" />
-              </div>
-              <div class="form-group">
-                <label>Payment Date *</label>
-                <input type="date" id="modal-pay-date" class="form-control" required value="${new Date().toISOString().substring(0, 10)}" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Payment Method *</label>
-                <select id="modal-pay-method" class="form-control">
-                  <option value="Bank Transfer">Bank Transfer / Online</option>
-                  <option value="Cash">Cash (Office Collection)</option>
-                  <option value="Credit / Debit Card">Credit / Debit Card</option>
-                  <option value="Cheque">Cheque</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Bank Reference / Slip No</label>
-                <input type="text" id="modal-pay-ref" class="form-control" placeholder="e.g. BOC-TX-8823" />
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 0.5rem;">
-              <label>Payment Notes / Milestones</label>
-              <input type="text" id="modal-pay-notes" class="form-control" placeholder="e.g. 2nd Installment - Visa Fee payment" />
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="btn-cancel-pay-modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Generate Receipt & Save</button>
-          </div>
-        </form>
-      </div>
-    `;
-
-    document.body.appendChild(modalOverlay);
-
-    const closeModal = () => {
-      modalOverlay.classList.remove('active');
-      setTimeout(() => modalOverlay.remove(), 200);
-    };
-
-    modalOverlay.querySelector('#btn-close-pay-modal').addEventListener('click', closeModal);
-    modalOverlay.querySelector('#btn-cancel-pay-modal').addEventListener('click', closeModal);
-
-    modalOverlay.querySelector('#form-payment-modal').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const select = modalOverlay.querySelector('#modal-pay-pilgrim-select');
-      const customerId = select.value;
-      const customerName = select.options[select.selectedIndex].getAttribute('data-name');
-      const amount = Number(modalOverlay.querySelector('#modal-pay-amount').value);
-      const paymentDate = modalOverlay.querySelector('#modal-pay-date').value;
-      const paymentMethod = modalOverlay.querySelector('#modal-pay-method').value;
-      const reference = modalOverlay.querySelector('#modal-pay-ref').value;
-      const notes = modalOverlay.querySelector('#modal-pay-notes').value;
-
-      if (!customerId || !amount) {
-        alert('Please select pilgrim and enter valid payment amount.');
-        return;
-      }
-
-      const newPayment = await recordPayment({
-        customerId,
-        customerName,
-        amount,
-        paymentDate,
-        paymentMethod,
-        reference,
-        notes
-      });
-
-      window.showNotification(`Payment recorded! Receipt: ${newPayment.receiptNo}`, 'success');
-      closeModal();
-      this.render(container);
     });
   },
 
   // Direct In-page Print for Official Branded Receipt
-  printOfficialReceipt(pilgrim, invoiceOrReceiptNo, payments, groups) {
+  printOfficialReceipt(pilgrim, invoiceOrReceiptNo, groups) {
     const group = groups.find(g => g.id === pilgrim.groupId);
     const due = (pilgrim.price || 0) - (pilgrim.paid || 0);
 
@@ -492,7 +297,7 @@ export default {
               <td>
                 <strong>Complete ${pilgrim.packageType.toUpperCase()} Pilgrimage Package</strong>
                 <div style="font-size: 10px; color: #64748b; margin-top: 2px;">
-                  Includes Return Air Tickets, Saudi Visa & Nusuk Registration, Makkah & Madinah Hotel Accommodation, 3 Daily Meals, Haramain Train Transfers, and Ziyarah Guided Tours.
+                  Includes Return Air Tickets, Saudi Visa & Nusuk Registration, Hotel Accommodation, 3 Daily Meals, Haramain Train Transfers, and Ziyarah Guided Tours.
                 </div>
               </td>
               <td>${pilgrim.packageType.toUpperCase()}</td>

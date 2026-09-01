@@ -120,7 +120,7 @@ async function navigateTo(viewName) {
     subtitleEl.innerText = 'Track airline group bookings, PNRs, airport pickups, and Haramain bullet train transfers.';
   } else if (viewName === 'invoices') {
     titleEl.innerText = 'Invoices & Payment Receipts';
-    subtitleEl.innerText = 'Track pilgrim installment milestones, balances due, and generate official payment receipts.';
+    subtitleEl.innerText = 'Track pilgrim billing summaries, balances due, and generate official payment receipts.';
   } else if (viewName === 'expenses') {
     titleEl.innerText = 'Expenses & Financial Logs';
     subtitleEl.innerText = 'Segregate pre-departure processing costs from on-tour accommodation/travel expenses.';
