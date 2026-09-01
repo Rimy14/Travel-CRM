@@ -113,10 +113,15 @@ export default {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;">
             ${flights.length === 0 ? `
               <div class="card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 4rem;">
-                No flight schedules recorded yet. Click "+ Add Flight Schedule" to log group block tickets.
+                No flight schedules recorded yet. Click "Add Flight Schedule" to log group block tickets.
               </div>
             ` : flights.map(f => {
               const isOut = f.direction === 'outbound';
+              const depDate = f.depDate || f.departureDate || 'TBD';
+              const depTime = f.depTime || f.departureTime || '';
+              const arrDate = f.arrDate || f.arrivalDate || 'TBD';
+              const arrTime = f.arrTime || f.arrivalTime || '';
+
               return `
                 <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
                   <div>
@@ -141,8 +146,8 @@ export default {
                       <div>
                         <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Origin</div>
                         <div style="font-weight: 700; color: var(--text-main); font-size: 0.85rem;">${f.origin}</div>
-                        <div style="font-size: 0.72rem; color: #065f46; font-family: monospace; font-weight: 600; margin-top: 2px;">${f.depDate}</div>
-                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-main);">${f.depTime}</div>
+                        <div style="font-size: 0.72rem; color: #065f46; font-family: monospace; font-weight: 600; margin-top: 2px;">${depDate}</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-main);">${depTime}</div>
                       </div>
 
                       <div style="text-align: center; color: #94a3b8;">
@@ -153,8 +158,8 @@ export default {
                       <div style="text-align: right;">
                         <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Destination</div>
                         <div style="font-weight: 700; color: var(--text-main); font-size: 0.85rem;">${f.destination}</div>
-                        <div style="font-size: 0.72rem; color: #065f46; font-family: monospace; font-weight: 600; margin-top: 2px;">${f.arrDate}</div>
-                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-main);">${f.arrTime}</div>
+                        <div style="font-size: 0.72rem; color: #065f46; font-family: monospace; font-weight: 600; margin-top: 2px;">${arrDate}</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-main);">${arrTime}</div>
                       </div>
                     </div>
 
@@ -168,9 +173,12 @@ export default {
                   </div>
 
                   <!-- Flight Footer -->
-                  <div style="border-top: 1px solid var(--border-color); padding-top: 0.6rem; display: flex; justify-content: flex-end;">
+                  <div style="border-top: 1px solid var(--border-color); padding-top: 0.6rem; display: flex; justify-content: flex-end; gap: 0.4rem;">
+                    <button class="btn btn-secondary btn-edit-flight" data-id="${f.id}" style="padding: 3px 8px; font-size: 0.72rem;">
+                      Edit
+                    </button>
                     <button class="btn btn-secondary btn-delete-flight" data-id="${f.id}" style="padding: 3px 8px; font-size: 0.72rem; color: #dc2626;">
-                      Remove Flight
+                      Remove
                     </button>
                   </div>
 
@@ -203,35 +211,47 @@ export default {
                 </thead>
                 <tbody>
                   ${transports.length === 0 ? `
-                    <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No ground transport manifests logged. Click "+ Add Ground Transfer" to record VIP coach or Haramain train bookings.</td></tr>
-                  ` : transports.map(t => `
-                    <tr>
-                      <td>
-                        <strong>${t.transferType}</strong>
-                      </td>
-                      <td>
-                        <div style="font-weight: 600;">${t.date}</div>
-                        <div style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted);">${t.pickupTime}</div>
-                      </td>
-                      <td>
-                        <strong style="color: #065f46;">${t.route}</strong>
-                      </td>
-                      <td>
-                        <div>${t.vehicleType || 'VIP SAPTCO Coach'}</div>
-                        <div style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">Plate: ${t.plateNo || 'TBD'}</div>
-                      </td>
-                      <td>
-                        <div>${t.driverName || 'Designated Driver'}</div>
-                        <div style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">${t.driverPhone || 'N/A'}</div>
-                      </td>
-                      <td>
-                        <span class="badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.7rem;">${t.status || 'Confirmed'}</span>
-                      </td>
-                      <td style="text-align: right;">
-                        <button class="btn btn-secondary btn-delete-trans" data-id="${t.id}" style="padding: 2px 7px; font-size: 0.7rem; color: #dc2626;">Remove</button>
-                      </td>
-                    </tr>
-                  `).join('')}
+                    <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">No ground transport manifests logged. Click "Add Ground Transfer" to record VIP coach or Haramain train bookings.</td></tr>
+                  ` : transports.map(t => {
+                    const transferType = t.transferType || t.type || 'Airport Transfer';
+                    const time = t.pickupTime || t.time || 'N/A';
+                    const vehicle = t.vehicleType || t.vehicle || 'VIP SAPTCO Coach';
+                    const plate = t.plateNo || t.vehiclePlate || 'TBD';
+                    const driver = t.driverName || t.driver || 'Designated Driver';
+                    const phone = t.driverPhone || 'N/A';
+
+                    return `
+                      <tr>
+                        <td>
+                          <strong>${transferType}</strong>
+                        </td>
+                        <td>
+                          <div style="font-weight: 600;">${t.date || 'TBD'}</div>
+                          <div style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted);">${time}</div>
+                        </td>
+                        <td>
+                          <strong style="color: #065f46;">${t.route}</strong>
+                        </td>
+                        <td>
+                          <div>${vehicle}</div>
+                          <div style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">Plate: ${plate}</div>
+                        </td>
+                        <td>
+                          <div>${driver}</div>
+                          <div style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">${phone}</div>
+                        </td>
+                        <td>
+                          <span class="badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.7rem;">${t.status || 'Confirmed'}</span>
+                        </td>
+                        <td style="text-align: right;">
+                          <div style="display: inline-flex; gap: 0.35rem;">
+                            <button class="btn btn-secondary btn-edit-trans" data-id="${t.id}" style="padding: 2px 7px; font-size: 0.7rem;">Edit</button>
+                            <button class="btn btn-secondary btn-delete-trans" data-id="${t.id}" style="padding: 2px 7px; font-size: 0.7rem; color: #dc2626;">Remove</button>
+                          </div>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
                 </tbody>
               </table>
             </div>
@@ -252,10 +272,19 @@ export default {
       });
     });
 
+    // Edit Flight
+    container.querySelectorAll('.btn-edit-flight').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const flight = flights.find(f => f.id === id);
+        if (flight) this.openFlightModal(container, flight);
+      });
+    });
+
     // Delete Flight
     container.querySelectorAll('.btn-delete-flight').forEach(btn => {
       btn.addEventListener('click', async (e) => {
-        const id = e.target.getAttribute('data-id');
+        const id = e.currentTarget.getAttribute('data-id');
         if (confirm('Delete this flight schedule?')) {
           await deleteFlight(id);
           window.showNotification('Flight schedule deleted.', 'info');
@@ -264,10 +293,19 @@ export default {
       });
     });
 
+    // Edit Transport
+    container.querySelectorAll('.btn-edit-trans').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const transport = transports.find(t => t.id === id);
+        if (transport) this.openTransportModal(container, transport);
+      });
+    });
+
     // Delete Transport
     container.querySelectorAll('.btn-delete-trans').forEach(btn => {
       btn.addEventListener('click', async (e) => {
-        const id = e.target.getAttribute('data-id');
+        const id = e.currentTarget.getAttribute('data-id');
         if (confirm('Delete this ground transfer?')) {
           await deleteTransport(id);
           window.showNotification('Ground transfer deleted.', 'info');
@@ -301,16 +339,23 @@ export default {
     }
   },
 
-  // Modal: Add Flight (Appended to document.body)
-  openFlightModal(container) {
+  // Modal: Add / Edit Flight (Appended to document.body)
+  openFlightModal(container, flight = null) {
+    const isEdit = !!flight;
+
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay active';
     modalOverlay.id = 'flight-modal-overlay';
 
+    const depDate = flight ? (flight.depDate || flight.departureDate || '') : '';
+    const depTime = flight ? (flight.depTime || flight.departureTime || '') : '';
+    const arrDate = flight ? (flight.arrDate || flight.arrivalDate || '') : '';
+    const arrTime = flight ? (flight.arrTime || flight.arrivalTime || '') : '';
+
     modalOverlay.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Add Flight Schedule</h3>
+          <h3>${isEdit ? 'Edit Flight Schedule' : 'Add Flight Schedule'}</h3>
           <button class="modal-close" id="btn-close-flight-modal">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
@@ -320,24 +365,24 @@ export default {
             <div class="form-row">
               <div class="form-group">
                 <label>Airline Name *</label>
-                <input type="text" id="f-airline" class="form-control" required placeholder="e.g. SriLankan Airlines" />
+                <input type="text" id="f-airline" class="form-control" value="${flight?.airline || ''}" required placeholder="e.g. SriLankan Airlines" />
               </div>
               <div class="form-group">
                 <label>Flight Number *</label>
-                <input type="text" id="f-number" class="form-control" required placeholder="e.g. UL 281" />
+                <input type="text" id="f-number" class="form-control" value="${flight?.flightNumber || ''}" required placeholder="e.g. UL 281" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Group PNR Code *</label>
-                <input type="text" id="f-pnr" class="form-control" required placeholder="e.g. AMJA-9981" />
+                <input type="text" id="f-pnr" class="form-control" value="${flight?.pnr || ''}" required placeholder="e.g. AMJA-9981" />
               </div>
               <div class="form-group">
                 <label>Direction</label>
                 <select id="f-direction" class="form-control">
-                  <option value="outbound">Outbound (To Saudi Arabia)</option>
-                  <option value="inbound">Inbound (Return Flight)</option>
+                  <option value="outbound" ${flight?.direction === 'outbound' ? 'selected' : ''}>Outbound (To Saudi Arabia)</option>
+                  <option value="inbound" ${flight?.direction === 'inbound' ? 'selected' : ''}>Inbound (Return Flight)</option>
                 </select>
               </div>
             </div>
@@ -345,36 +390,36 @@ export default {
             <div class="form-row">
               <div class="form-group">
                 <label>Origin Airport *</label>
-                <input type="text" id="f-origin" class="form-control" required placeholder="e.g. Colombo (CMB)" />
+                <input type="text" id="f-origin" class="form-control" value="${flight?.origin || ''}" required placeholder="e.g. Colombo (CMB)" />
               </div>
               <div class="form-group">
                 <label>Destination Airport *</label>
-                <input type="text" id="f-dest" class="form-control" required placeholder="e.g. Jeddah (JED)" />
+                <input type="text" id="f-dest" class="form-control" value="${flight?.destination || ''}" required placeholder="e.g. Jeddah (JED)" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Departure Date & Time *</label>
-                <input type="date" id="f-dep-date" class="form-control" required />
-                <input type="time" id="f-dep-time" class="form-control" required style="margin-top: 4px;" />
+                <input type="date" id="f-dep-date" class="form-control" value="${depDate}" required />
+                <input type="time" id="f-dep-time" class="form-control" value="${depTime}" required style="margin-top: 4px;" />
               </div>
               <div class="form-group">
                 <label>Arrival Date & Time *</label>
-                <input type="date" id="f-arr-date" class="form-control" required />
-                <input type="time" id="f-arr-time" class="form-control" required style="margin-top: 4px;" />
+                <input type="date" id="f-arr-date" class="form-control" value="${arrDate}" required />
+                <input type="time" id="f-arr-time" class="form-control" value="${arrTime}" required style="margin-top: 4px;" />
               </div>
             </div>
 
             <div class="form-group" style="margin-top: 0.5rem;">
               <label>Baggage Policy</label>
-              <input type="text" id="f-baggage" class="form-control" value="2x 23kg Check-in + 7kg Hand Baggage + 5L Zamzam" />
+              <input type="text" id="f-baggage" class="form-control" value="${flight?.baggage || '2x 23kg Check-in + 7kg Hand Baggage + 5L Zamzam'}" />
             </div>
           </div>
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="btn-cancel-flight-modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Flight Route</button>
+            <button type="submit" class="btn btn-primary">${isEdit ? 'Save Changes' : 'Save Flight Route'}</button>
           </div>
         </form>
       </div>
@@ -398,42 +443,52 @@ export default {
       const direction = modalOverlay.querySelector('#f-direction').value;
       const origin = modalOverlay.querySelector('#f-origin').value;
       const destination = modalOverlay.querySelector('#f-dest').value;
-      const depDate = modalOverlay.querySelector('#f-dep-date').value;
-      const depTime = modalOverlay.querySelector('#f-dep-time').value;
-      const arrDate = modalOverlay.querySelector('#f-arr-date').value;
-      const arrTime = modalOverlay.querySelector('#f-arr-time').value;
+      const depDateVal = modalOverlay.querySelector('#f-dep-date').value;
+      const depTimeVal = modalOverlay.querySelector('#f-dep-time').value;
+      const arrDateVal = modalOverlay.querySelector('#f-arr-date').value;
+      const arrTimeVal = modalOverlay.querySelector('#f-arr-time').value;
       const baggage = modalOverlay.querySelector('#f-baggage').value;
 
       await saveFlight({
+        id: flight?.id || undefined,
         airline,
         flightNumber,
         pnr,
         direction,
         origin,
         destination,
-        depDate,
-        depTime,
-        arrDate,
-        arrTime,
+        depDate: depDateVal,
+        depTime: depTimeVal,
+        arrDate: arrDateVal,
+        arrTime: arrTimeVal,
         baggage
       });
 
-      window.showNotification('Flight route saved successfully!', 'success');
+      window.showNotification(isEdit ? 'Flight schedule updated successfully!' : 'Flight route saved successfully!', 'success');
       closeModal();
       this.render(container);
     });
   },
 
-  // Modal: Add Ground Transport (Appended to document.body)
-  openTransportModal(container) {
+  // Modal: Add / Edit Ground Transport (Appended to document.body)
+  openTransportModal(container, transport = null) {
+    const isEdit = !!transport;
+
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay active';
     modalOverlay.id = 'transport-modal-overlay';
 
+    const currentType = transport ? (transport.transferType || transport.type || 'Airport Pickup Transfer') : 'Airport Pickup Transfer';
+    const currentTime = transport ? (transport.pickupTime || transport.time || '') : '';
+    const currentVehicle = transport ? (transport.vehicleType || transport.vehicle || '') : '';
+    const currentPlate = transport ? (transport.plateNo || transport.vehiclePlate || '') : '';
+    const currentDriver = transport ? (transport.driverName || transport.driver || '') : '';
+    const currentPhone = transport ? (transport.driverPhone || '') : '';
+
     modalOverlay.innerHTML = `
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Add Ground Transport Transfer</h3>
+          <h3>${isEdit ? 'Edit Ground Transport Transfer' : 'Add Ground Transport Transfer'}</h3>
           <button class="modal-close" id="btn-close-trans-modal">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
@@ -443,55 +498,55 @@ export default {
             <div class="form-group">
               <label>Transfer Type *</label>
               <select id="t-type" class="form-control">
-                <option value="Airport Pickup Transfer">Airport Pickup Transfer</option>
-                <option value="Intercity High-Speed Train">Intercity High-Speed Train (Haramain)</option>
-                <option value="Historical Ziyarah Tour">Historical Ziyarah Tour</option>
-                <option value="Departure Airport Drop">Departure Airport Drop</option>
+                <option value="Airport Pickup Transfer" ${currentType === 'Airport Pickup Transfer' ? 'selected' : ''}>Airport Pickup Transfer</option>
+                <option value="Intercity High-Speed Train" ${currentType.includes('Train') ? 'selected' : ''}>Intercity High-Speed Train (Haramain)</option>
+                <option value="Historical Ziyarah Tour" ${currentType.includes('Ziyarah') ? 'selected' : ''}>Historical Ziyarah Tour</option>
+                <option value="Departure Airport Drop" ${currentType === 'Departure Airport Drop' ? 'selected' : ''}>Departure Airport Drop</option>
               </select>
             </div>
 
             <div class="form-group">
               <label>Route / Destinations *</label>
-              <input type="text" id="t-route" class="form-control" required placeholder="e.g. Jeddah Airport ➔ Makkah Hotel" />
+              <input type="text" id="t-route" class="form-control" value="${transport?.route || ''}" required placeholder="e.g. Jeddah Airport ➔ Makkah Hotel" />
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Date *</label>
-                <input type="date" id="t-date" class="form-control" required />
+                <input type="date" id="t-date" class="form-control" value="${transport?.date || ''}" required />
               </div>
               <div class="form-group">
                 <label>Pickup Time *</label>
-                <input type="time" id="t-time" class="form-control" required />
+                <input type="time" id="t-time" class="form-control" value="${currentTime}" required />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Vehicle Model / Type</label>
-                <input type="text" id="t-vehicle" class="form-control" placeholder="e.g. Luxury 50-Seater Coach" />
+                <input type="text" id="t-vehicle" class="form-control" value="${currentVehicle}" placeholder="e.g. Luxury 50-Seater Coach" />
               </div>
               <div class="form-group">
                 <label>Plate / Booking Ref</label>
-                <input type="text" id="t-plate" class="form-control" placeholder="e.g. KSA-7782-HJJ" />
+                <input type="text" id="t-plate" class="form-control" value="${currentPlate}" placeholder="e.g. KSA-7782-HJJ" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label>Driver / Captain Name</label>
-                <input type="text" id="t-driver" class="form-control" placeholder="e.g. Brother Tariq" />
+                <input type="text" id="t-driver" class="form-control" value="${currentDriver}" placeholder="e.g. Brother Tariq" />
               </div>
               <div class="form-group">
                 <label>Driver Phone Number</label>
-                <input type="text" id="t-phone" class="form-control" placeholder="e.g. +966 55 123 4567" />
+                <input type="text" id="t-phone" class="form-control" value="${currentPhone}" placeholder="e.g. +966 55 123 4567" />
               </div>
             </div>
           </div>
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="btn-cancel-trans-modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Transfer</button>
+            <button type="submit" class="btn btn-primary">${isEdit ? 'Save Changes' : 'Save Transfer'}</button>
           </div>
         </form>
       </div>
@@ -519,6 +574,7 @@ export default {
       const driverPhone = modalOverlay.querySelector('#t-phone').value;
 
       await saveTransport({
+        id: transport?.id || undefined,
         transferType,
         route,
         date,
@@ -527,10 +583,10 @@ export default {
         plateNo,
         driverName,
         driverPhone,
-        status: 'Confirmed'
+        status: transport?.status || 'Confirmed'
       });
 
-      window.showNotification('Ground transfer saved successfully!', 'success');
+      window.showNotification(isEdit ? 'Ground transfer updated successfully!' : 'Ground transfer saved successfully!', 'success');
       closeModal();
       this.render(container);
     });
@@ -584,12 +640,12 @@ export default {
           <tbody>
             ${flights.map(f => `
               <tr>
-                <td><strong>${f.direction.toUpperCase()}</strong></td>
+                <td><strong>${(f.direction || 'outbound').toUpperCase()}</strong></td>
                 <td>${f.airline} &bull; <strong>${f.flightNumber}</strong></td>
                 <td style="font-family: monospace; font-weight: 700; color: #065f46;">${f.pnr}</td>
                 <td>${f.origin} ➔ ${f.destination}</td>
-                <td>${f.depDate} &bull; ${f.depTime}</td>
-                <td>${f.arrDate} &bull; ${f.arrTime}</td>
+                <td>${f.depDate || f.departureDate || 'TBD'} &bull; ${f.depTime || f.departureTime || ''}</td>
+                <td>${f.arrDate || f.arrivalDate || 'TBD'} &bull; ${f.arrTime || f.arrivalTime || ''}</td>
                 <td>${f.baggage || '2x 23kg + 7kg + 5L Zamzam'}</td>
               </tr>
             `).join('')}
@@ -609,16 +665,25 @@ export default {
             </tr>
           </thead>
           <tbody>
-            ${transports.map(t => `
-              <tr>
-                <td><strong>${t.transferType}</strong></td>
-                <td>${t.date} &bull; <strong>${t.pickupTime}</strong></td>
-                <td style="color: #065f46; font-weight: 600;">${t.route}</td>
-                <td>${t.vehicleType} (Plate: ${t.plateNo || 'TBD'})</td>
-                <td>${t.driverName} (${t.driverPhone || 'N/A'})</td>
-                <td>${t.status || 'Confirmed'}</td>
-              </tr>
-            `).join('')}
+            ${transports.map(t => {
+              const transferType = t.transferType || t.type || 'Airport Transfer';
+              const time = t.pickupTime || t.time || 'N/A';
+              const vehicle = t.vehicleType || t.vehicle || 'VIP Coach';
+              const plate = t.plateNo || t.vehiclePlate || 'TBD';
+              const driver = t.driverName || t.driver || 'Driver';
+              const phone = t.driverPhone || 'N/A';
+
+              return `
+                <tr>
+                  <td><strong>${transferType}</strong></td>
+                  <td>${t.date || 'TBD'} &bull; <strong>${time}</strong></td>
+                  <td style="color: #065f46; font-weight: 600;">${t.route}</td>
+                  <td>${vehicle} (Plate: ${plate})</td>
+                  <td>${driver} (${phone})</td>
+                  <td>${t.status || 'Confirmed'}</td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
 
