@@ -110,8 +110,8 @@ async function navigateTo(viewName) {
     titleEl.innerText = 'Expenses & Financial Logs';
     subtitleEl.innerText = 'Segregate pre-departure processing costs from on-tour accommodation/travel expenses.';
   } else if (viewName === 'reports') {
-    titleEl.innerText = 'Date-wise Business Reports & Analytics Hub';
-    subtitleEl.innerText = 'Analyze date-wise pilgrim enrollments, active cohorts, cancellations, and financial settlements.';
+    titleEl.innerText = 'Reports & Analytics';
+    subtitleEl.innerText = 'Analyze pilgrim enrollments, active cohorts, cancellations, and financial settlements.';
   }
 
   // Render content
