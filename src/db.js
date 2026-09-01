@@ -42,15 +42,24 @@ function generateId() {
   return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 }
 
-// Get stored Firebase configuration
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCj-1SVmds61ONGZ6FsD31KlFjdYiPw7II",
+  authDomain: "amja-travels-ca870.firebaseapp.com",
+  projectId: "amja-travels-ca870",
+  storageBucket: "amja-travels-ca870.firebasestorage.app",
+  messagingSenderId: "75246992156",
+  appId: "1:75246992156:web:3d8644c6354e4b456818d9"
+};
+
+// Get stored Firebase configuration or default
 export function getFirebaseConfig() {
   try {
     const configStr = localStorage.getItem(KEYS.CONFIG);
-    return configStr ? JSON.parse(configStr) : null;
+    if (configStr) return JSON.parse(configStr);
   } catch (e) {
     console.error('Error reading Firebase config from LocalStorage:', e);
-    return null;
   }
+  return DEFAULT_FIREBASE_CONFIG;
 }
 
 // Save Firebase configuration and trigger re-init

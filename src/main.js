@@ -10,7 +10,6 @@ import dashboardView from './views/dashboard.js';
 import customersView from './views/customers.js';
 import groupsView from './views/groups.js';
 import expensesView from './views/expenses.js';
-import settingsView from './views/settings.js';
 
 // Global Router State
 let activeViewName = 'dashboard';
@@ -18,8 +17,7 @@ const views = {
   dashboard: dashboardView,
   customers: customersView,
   groups: groupsView,
-  expenses: expensesView,
-  settings: settingsView
+  expenses: expensesView
 };
 
 // Global Notifications Toast Manager
@@ -67,21 +65,7 @@ window.showNotification = function(message, type = 'success') {
   }, 4500);
 };
 
-// Global DB Connection Badge Updater
-window.updateSidebarDbStatus = function() {
-  const indicator = document.getElementById('db-status-indicator');
-  const text = document.getElementById('db-status-text');
-  if (!indicator || !text) return;
 
-  const connected = isFirebaseConnected();
-  if (connected) {
-    indicator.className = 'db-status-card firebase';
-    text.innerText = 'Firebase Synced';
-  } else {
-    indicator.className = 'db-status-card local';
-    text.innerText = 'Local Storage Mode';
-  }
-};
 
 // View Switcher Router Core
 async function navigateTo(viewName) {
@@ -123,9 +107,6 @@ async function navigateTo(viewName) {
   } else if (viewName === 'expenses') {
     titleEl.innerText = 'Expenses & Financial Logs';
     subtitleEl.innerText = 'Segregate pre-departure processing costs from on-tour accommodation/travel expenses.';
-  } else if (viewName === 'settings') {
-    titleEl.innerText = 'Firebase Database Settings';
-    subtitleEl.innerText = 'Configure remote connections, sync offline data, and scale your data model.';
   }
 
   // Render content
@@ -155,13 +136,7 @@ async function initializeApp() {
     });
   });
 
-  // Bind Bottom Configure Database trigger
-  const configureDbBtn = document.getElementById('db-status-configure');
-  if (configureDbBtn) {
-    configureDbBtn.addEventListener('click', () => {
-      navigateTo('settings');
-    });
-  }
+
 
   // Bind Header Quick Actions Menu Trigger
   const quickActionsBtn = document.getElementById('btn-quick-add');
@@ -202,15 +177,8 @@ async function initializeApp() {
     });
   }
 
-  // Boot Database Engine
-  const connected = await initializeDatabase();
-  window.updateSidebarDbStatus();
-  
-  if (connected) {
-    window.showNotification('Successfully synced to Firebase Firestore database!', 'success');
-  } else {
-    window.showNotification('Running in local offline mode. Data stored in browser storage.', 'warning');
-  }
+  // Boot Database Engine silently in background
+  await initializeDatabase();
 
   // Subscribe to DB updates (Firestore syncs or Local writes) to refresh active panel in real time
   onDataChanged(() => {
