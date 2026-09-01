@@ -9,6 +9,7 @@ import { initializeDatabase, onDataChanged, isFirebaseConnected } from './db.js'
 import dashboardView from './views/dashboard.js';
 import customersView from './views/customers.js';
 import groupsView from './views/groups.js';
+import itineraryView from './views/itinerary.js';
 import hotelsView from './views/hotels.js';
 import flightsView from './views/flights.js';
 import invoicesView from './views/invoices.js';
@@ -21,6 +22,7 @@ const views = {
   dashboard: dashboardView,
   customers: customersView,
   groups: groupsView,
+  itinerary: itineraryView,
   hotels: hotelsView,
   flights: flightsView,
   invoices: invoicesView,
@@ -110,8 +112,11 @@ async function navigateTo(viewName) {
     titleEl.innerText = 'Customer Directory';
     subtitleEl.innerText = 'Manage pilgrim bookings, travel status, and record documents submission.';
   } else if (viewName === 'groups') {
-    titleEl.innerText = 'Tour Cohort Planner';
-    subtitleEl.innerText = 'Establish groups of pilgrims, set pricing models, and coordinate daily itineraries.';
+    titleEl.innerText = 'Tour Groups & Cohorts';
+    subtitleEl.innerText = 'Establish groups of pilgrims, set pricing models, and coordinate tour capacity.';
+  } else if (viewName === 'itinerary') {
+    titleEl.innerText = 'Daily Itinerary & Timetable Planner';
+    subtitleEl.innerText = 'Build chronological daily schedules, apply 1-click templates, and generate prayer timetables.';
   } else if (viewName === 'hotels') {
     titleEl.innerText = 'Hotels & Room Allocation';
     subtitleEl.innerText = 'Manage Makkah & Madinah hotel properties, room capacities, and pilgrim bed assignments.';
