@@ -9,6 +9,9 @@ import { initializeDatabase, onDataChanged, isFirebaseConnected } from './db.js'
 import dashboardView from './views/dashboard.js';
 import customersView from './views/customers.js';
 import groupsView from './views/groups.js';
+import hotelsView from './views/hotels.js';
+import flightsView from './views/flights.js';
+import invoicesView from './views/invoices.js';
 import expensesView from './views/expenses.js';
 import reportsView from './views/reports.js';
 
@@ -18,6 +21,9 @@ const views = {
   dashboard: dashboardView,
   customers: customersView,
   groups: groupsView,
+  hotels: hotelsView,
+  flights: flightsView,
+  invoices: invoicesView,
   expenses: expensesView,
   reports: reportsView
 };
@@ -106,6 +112,15 @@ async function navigateTo(viewName) {
   } else if (viewName === 'groups') {
     titleEl.innerText = 'Tour Cohort Planner';
     subtitleEl.innerText = 'Establish groups of pilgrims, set pricing models, and coordinate daily itineraries.';
+  } else if (viewName === 'hotels') {
+    titleEl.innerText = 'Hotels & Room Allocation';
+    subtitleEl.innerText = 'Manage Makkah & Madinah hotel properties, room capacities, and pilgrim bed assignments.';
+  } else if (viewName === 'flights') {
+    titleEl.innerText = 'Flights & Ground Transport Logistics';
+    subtitleEl.innerText = 'Track airline group bookings, PNRs, airport pickups, and Haramain bullet train transfers.';
+  } else if (viewName === 'invoices') {
+    titleEl.innerText = 'Invoices & Payment Receipts';
+    subtitleEl.innerText = 'Track pilgrim installment milestones, balances due, and generate official payment receipts.';
   } else if (viewName === 'expenses') {
     titleEl.innerText = 'Expenses & Financial Logs';
     subtitleEl.innerText = 'Segregate pre-departure processing costs from on-tour accommodation/travel expenses.';
