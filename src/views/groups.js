@@ -149,8 +149,8 @@ export default {
                     <div style="font-weight: 700; color: #065f46; font-family: monospace;">LKR ${(group.basePrice || 0).toLocaleString()}</div>
                   </div>
                   <div>
-                    <span style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Group Revenue</span>
-                    <div style="font-weight: 700; color: #059669; font-family: monospace;">LKR ${totalRev.toLocaleString()}</div>
+                    <span style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Flight PNR</span>
+                    <div style="font-weight: 700; color: #2563eb; font-family: monospace;">${group.pnr || 'TBD'}</div>
                   </div>
                 </div>
 
@@ -312,6 +312,11 @@ export default {
                 <input type="text" id="g-guide" class="form-control" value="${group?.guide || ''}" placeholder="e.g. Sheikh Abdul Rahman" />
               </div>
             </div>
+
+            <div class="form-group" style="margin-top: 0.25rem;">
+              <label>Airline Group PNR / Booking Ref</label>
+              <input type="text" id="g-pnr" class="form-control" value="${group?.pnr || ''}" placeholder="e.g. AMJA-9981 / UL-281" />
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -341,6 +346,7 @@ export default {
       const arrivalDate = modalOverlay.querySelector('#g-arrival').value;
       const basePrice = Number(modalOverlay.querySelector('#g-price').value);
       const guide = modalOverlay.querySelector('#g-guide').value;
+      const pnr = modalOverlay.querySelector('#g-pnr').value;
 
       await saveGroup({
         id: group?.id || undefined,
@@ -351,6 +357,7 @@ export default {
         arrivalDate,
         basePrice,
         guide,
+        pnr,
         itinerary: group ? group.itinerary : []
       });
 
