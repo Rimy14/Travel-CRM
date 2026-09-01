@@ -211,50 +211,52 @@ export default {
             <button class="modal-close" id="btn-close-group-modal">&times;</button>
           </div>
           <form id="form-group">
-            <input type="hidden" id="group-id" value="" />
+            <div class="modal-body">
+              <input type="hidden" id="group-id" value="" />
 
-            <div class="form-group">
-              <label>Cohort / Group Name *</label>
-              <input type="text" id="group-name" required placeholder="e.g. Amja 14-Day Classic Umrah Group" />
+              <div class="form-group">
+                <label>Cohort / Group Name *</label>
+                <input type="text" id="group-name" required placeholder="e.g. Amja 14-Day Classic Umrah Group" />
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Package Type *</label>
+                  <select id="group-type">
+                    <option value="umrah">Umrah Pilgrimage</option>
+                    <option value="hajj">Hajj Pilgrimage</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Target Capacity (Pax) *</label>
+                  <input type="number" id="group-capacity" required min="1" max="500" value="20" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Departure Date</label>
+                  <input type="date" id="group-departure" />
+                </div>
+                <div class="form-group">
+                  <label>Return Date</label>
+                  <input type="date" id="group-arrival" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Base Price per Pilgrim (LKR) *</label>
+                  <input type="number" id="group-price" required min="0" step="1000" placeholder="e.g. 400000" />
+                </div>
+                <div class="form-group">
+                  <label>Tour Leader / Assigned Sheikh</label>
+                  <input type="text" id="group-guide" placeholder="e.g. Sheikh Abdul Rahman" />
+                </div>
+              </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Package Type *</label>
-                <select id="group-type">
-                  <option value="umrah">Umrah Pilgrimage</option>
-                  <option value="hajj">Hajj Pilgrimage</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Target Capacity (Pax) *</label>
-                <input type="number" id="group-capacity" required min="1" max="500" value="20" />
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Departure Date</label>
-                <input type="date" id="group-departure" />
-              </div>
-              <div class="form-group">
-                <label>Return Date</label>
-                <input type="date" id="group-arrival" />
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Base Price per Pilgrim (LKR) *</label>
-                <input type="number" id="group-price" required min="0" step="1000" placeholder="e.g. 400000" />
-              </div>
-              <div class="form-group">
-                <label>Tour Leader / Assigned Sheikh</label>
-                <input type="text" id="group-guide" placeholder="e.g. Sheikh Abdul Rahman" />
-              </div>
-            </div>
-
-            <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="btn-cancel-group">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Tour Cohort</button>
             </div>

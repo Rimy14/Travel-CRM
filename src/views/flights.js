@@ -220,61 +220,63 @@ export default {
             <button class="modal-close" id="btn-close-flight-modal">&times;</button>
           </div>
           <form id="form-flight">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Airline Name *</label>
-                <input type="text" id="flight-airline" required placeholder="e.g. SriLankan Airlines" />
+            <div class="modal-body">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Airline Name *</label>
+                  <input type="text" id="flight-airline" required placeholder="e.g. SriLankan Airlines" />
+                </div>
+                <div class="form-group">
+                  <label>Flight Number *</label>
+                  <input type="text" id="flight-number" required placeholder="e.g. UL 281" />
+                </div>
               </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Group PNR Code *</label>
+                  <input type="text" id="flight-pnr" required placeholder="e.g. AMJA-9981" />
+                </div>
+                <div class="form-group">
+                  <label>Direction</label>
+                  <select id="flight-direction">
+                    <option value="outbound">Outbound (To Saudi Arabia)</option>
+                    <option value="inbound">Inbound (Return Flight)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Origin Airport *</label>
+                  <input type="text" id="flight-origin" required placeholder="e.g. Colombo (CMB)" />
+                </div>
+                <div class="form-group">
+                  <label>Destination Airport *</label>
+                  <input type="text" id="flight-dest" required placeholder="e.g. Jeddah (JED)" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Departure Date & Time *</label>
+                  <input type="date" id="flight-dep-date" required />
+                  <input type="time" id="flight-dep-time" required style="margin-top: 4px;" />
+                </div>
+                <div class="form-group">
+                  <label>Arrival Date & Time *</label>
+                  <input type="date" id="flight-arr-date" required />
+                  <input type="time" id="flight-arr-time" required style="margin-top: 4px;" />
+                </div>
+              </div>
+
               <div class="form-group">
-                <label>Flight Number *</label>
-                <input type="text" id="flight-number" required placeholder="e.g. UL 281" />
+                <label>Baggage Policy</label>
+                <input type="text" id="flight-baggage" value="2x 23kg Check-in + 7kg Hand Baggage + 5L Zamzam" />
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Group PNR Code *</label>
-                <input type="text" id="flight-pnr" required placeholder="e.g. AMJA-9981" />
-              </div>
-              <div class="form-group">
-                <label>Direction</label>
-                <select id="flight-direction">
-                  <option value="outbound">Outbound (To Saudi Arabia)</option>
-                  <option value="inbound">Inbound (Return Flight)</option>
-                </select>
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Origin Airport *</label>
-                <input type="text" id="flight-origin" required placeholder="e.g. Colombo (CMB)" />
-              </div>
-              <div class="form-group">
-                <label>Destination Airport *</label>
-                <input type="text" id="flight-dest" required placeholder="e.g. Jeddah (JED)" />
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Departure Date & Time *</label>
-                <input type="date" id="flight-dep-date" required />
-                <input type="time" id="flight-dep-time" required style="margin-top: 4px;" />
-              </div>
-              <div class="form-group">
-                <label>Arrival Date & Time *</label>
-                <input type="date" id="flight-arr-date" required />
-                <input type="time" id="flight-arr-time" required style="margin-top: 4px;" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Baggage Policy</label>
-              <input type="text" id="flight-baggage" value="2x 23kg Check-in + 7kg Hand Baggage + 5L Zamzam" />
-            </div>
-
-            <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="btn-cancel-flight">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Flight Route</button>
             </div>
@@ -290,55 +292,57 @@ export default {
             <button class="modal-close" id="btn-close-trans-modal">&times;</button>
           </div>
           <form id="form-trans">
-            <div class="form-group">
-              <label>Transfer Type *</label>
-              <select id="trans-type">
-                <option value="Airport Pickup Transfer">Airport Pickup Transfer</option>
-                <option value="Intercity High-Speed Train">Intercity High-Speed Train (Haramain)</option>
-                <option value="Historical Ziyarah Tour">Historical Ziyarah Tour</option>
-                <option value="Departure Airport Drop">Departure Airport Drop</option>
-              </select>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Transfer Type *</label>
+                <select id="trans-type">
+                  <option value="Airport Pickup Transfer">Airport Pickup Transfer</option>
+                  <option value="Intercity High-Speed Train">Intercity High-Speed Train (Haramain)</option>
+                  <option value="Historical Ziyarah Tour">Historical Ziyarah Tour</option>
+                  <option value="Departure Airport Drop">Departure Airport Drop</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Route / Destinations *</label>
+                <input type="text" id="trans-route" required placeholder="e.g. Jeddah Airport ➔ Makkah Hotel" />
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Date *</label>
+                  <input type="date" id="trans-date" required />
+                </div>
+                <div class="form-group">
+                  <label>Pickup Time *</label>
+                  <input type="time" id="trans-time" required />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Vehicle Model / Type</label>
+                  <input type="text" id="trans-vehicle" placeholder="e.g. Luxury 50-Seater Coach" />
+                </div>
+                <div class="form-group">
+                  <label>Plate / Booking Ref</label>
+                  <input type="text" id="trans-plate" placeholder="e.g. KSA-7782-HJJ" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Driver / Captain Name</label>
+                  <input type="text" id="trans-driver" placeholder="e.g. Brother Tariq" />
+                </div>
+                <div class="form-group">
+                  <label>Driver Phone Number</label>
+                  <input type="text" id="trans-phone" placeholder="e.g. +966 55 123 4567" />
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label>Route / Destinations *</label>
-              <input type="text" id="trans-route" required placeholder="e.g. Jeddah Airport ➔ Makkah Hotel" />
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Date *</label>
-                <input type="date" id="trans-date" required />
-              </div>
-              <div class="form-group">
-                <label>Pickup Time *</label>
-                <input type="time" id="trans-time" required />
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Vehicle Model / Type</label>
-                <input type="text" id="trans-vehicle" placeholder="e.g. Luxury 50-Seater Coach" />
-              </div>
-              <div class="form-group">
-                <label>Plate / Booking Ref</label>
-                <input type="text" id="trans-plate" placeholder="e.g. KSA-7782-HJJ" />
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Driver / Captain Name</label>
-                <input type="text" id="trans-driver" placeholder="e.g. Brother Tariq" />
-              </div>
-              <div class="form-group">
-                <label>Driver Phone Number</label>
-                <input type="text" id="trans-phone" placeholder="e.g. +966 55 123 4567" />
-              </div>
-            </div>
-
-            <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="btn-cancel-trans">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Transfer</button>
             </div>

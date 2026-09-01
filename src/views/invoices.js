@@ -249,52 +249,54 @@ export default {
             <button class="modal-close" id="btn-close-pay-modal">&times;</button>
           </div>
           <form id="form-payment">
-            <div class="form-group">
-              <label>Select Pilgrim Traveler *</label>
-              <select id="pay-pilgrim-select" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                <option value="">-- Choose pilgrim --</option>
-                ${activePilgrims.map(p => {
-                  const due = (p.price || 0) - (p.paid || 0);
-                  return `<option value="${p.id}" data-name="${p.name}" data-due="${due}">
-                    ${p.name} (Due: LKR ${due.toLocaleString()})
-                  </option>`;
-                }).join('')}
-              </select>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="modal-body">
               <div class="form-group">
-                <label>Payment Amount (LKR) *</label>
-                <input type="number" id="pay-amount" required min="1000" step="500" placeholder="e.g. 200000" />
-              </div>
-              <div class="form-group">
-                <label>Payment Date *</label>
-                <input type="date" id="pay-date" required value="${new Date().toISOString().substring(0, 10)}" />
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div class="form-group">
-                <label>Payment Method *</label>
-                <select id="pay-method">
-                  <option value="Bank Transfer">Bank Transfer / Online</option>
-                  <option value="Cash">Cash (Office Collection)</option>
-                  <option value="Credit / Debit Card">Credit / Debit Card</option>
-                  <option value="Cheque">Cheque</option>
+                <label>Select Pilgrim Traveler *</label>
+                <select id="pay-pilgrim-select" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                  <option value="">-- Choose pilgrim --</option>
+                  ${activePilgrims.map(p => {
+                    const due = (p.price || 0) - (p.paid || 0);
+                    return `<option value="${p.id}" data-name="${p.name}" data-due="${due}">
+                      ${p.name} (Due: LKR ${due.toLocaleString()})
+                    </option>`;
+                  }).join('')}
                 </select>
               </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Payment Amount (LKR) *</label>
+                  <input type="number" id="pay-amount" required min="1000" step="500" placeholder="e.g. 200000" />
+                </div>
+                <div class="form-group">
+                  <label>Payment Date *</label>
+                  <input type="date" id="pay-date" required value="${new Date().toISOString().substring(0, 10)}" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label>Payment Method *</label>
+                  <select id="pay-method">
+                    <option value="Bank Transfer">Bank Transfer / Online</option>
+                    <option value="Cash">Cash (Office Collection)</option>
+                    <option value="Credit / Debit Card">Credit / Debit Card</option>
+                    <option value="Cheque">Cheque</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Bank Reference / Slip No</label>
+                  <input type="text" id="pay-ref" placeholder="e.g. BOC-TX-8823" />
+                </div>
+              </div>
+
               <div class="form-group">
-                <label>Bank Reference / Slip No</label>
-                <input type="text" id="pay-ref" placeholder="e.g. BOC-TX-8823" />
+                <label>Payment Notes / Milestones</label>
+                <input type="text" id="pay-notes" placeholder="e.g. 2nd Installment - Visa Fee payment" />
               </div>
             </div>
 
-            <div class="form-group">
-              <label>Payment Notes / Milestones</label>
-              <input type="text" id="pay-notes" placeholder="e.g. 2nd Installment - Visa Fee payment" />
-            </div>
-
-            <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="btn-cancel-pay">Cancel</button>
               <button type="submit" class="btn btn-primary">Generate Receipt & Save</button>
             </div>

@@ -242,37 +242,40 @@ export default {
             <button class="modal-close" id="btn-close-assign-modal">&times;</button>
           </div>
           <form id="form-assign-room">
-            <input type="hidden" id="assign-hotel-id" />
-            <input type="hidden" id="assign-room-id" />
-            <input type="hidden" id="assign-bed-slot" />
+            <div class="modal-body">
+              <input type="hidden" id="assign-hotel-id" />
+              <input type="hidden" id="assign-room-id" />
+              <input type="hidden" id="assign-bed-slot" />
 
-            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1rem; font-size: 0.8125rem;">
-              <div>Hotel: <strong id="assign-disp-hotel"></strong></div>
-              <div>Room: <strong id="assign-disp-room"></strong> &bull; Bed Slot: <strong id="assign-disp-slot"></strong></div>
+              <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1rem; font-size: 0.8125rem;">
+                <div>Hotel: <strong id="assign-disp-hotel"></strong></div>
+                <div>Room: <strong id="assign-disp-room"></strong> &bull; Bed Slot: <strong id="assign-disp-slot"></strong></div>
+              </div>
+
+              <div class="form-group">
+                <label>Select Pilgrim Traveler *</label>
+                <select id="assign-pilgrim-select" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                  <option value="">-- Choose unassigned pilgrim --</option>
+                  ${activePilgrims.map(p => {
+                    const isAllocated = allocations.some(a => a.customerId === p.id);
+                    return `<option value="${p.id}" data-name="${p.name}">
+                      ${p.name} (${p.packageType.toUpperCase()}) ${isAllocated ? '⚠️ (Already in another room)' : '✓ Available'}
+                    </option>`;
+                  }).join('')}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Special Rooming Note / Requests</label>
+                <input type="text" id="assign-notes" placeholder="e.g. Near elevator, Family sharing preference" />
+              </div>
             </div>
 
-            <div class="form-group">
-              <label>Select Pilgrim Traveler *</label>
-              <select id="assign-pilgrim-select" required style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                <option value="">-- Choose unassigned pilgrim --</option>
-                ${activePilgrims.map(p => {
-                  const isAllocated = allocations.some(a => a.customerId === p.id);
-                  return `<option value="${p.id}" data-name="${p.name}">
-                    ${p.name} (${p.packageType.toUpperCase()}) ${isAllocated ? '⚠️ (Already in another room)' : '✓ Available'}
-                  </option>`;
-                }).join('')}
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Special Rooming Note / Requests</label>
-              <input type="text" id="assign-notes" placeholder="e.g. Near elevator, Family sharing preference" />
-            </div>
-
-            <div class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="btn-cancel-assign">Cancel</button>
               <button type="submit" class="btn btn-primary">Confirm Allocation</button>
             </div>
+          </form>
           </form>
         </div>
       </div>
